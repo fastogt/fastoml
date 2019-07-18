@@ -50,3 +50,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# fastogt
+build_cmake
+CMakeLists.txt.user
