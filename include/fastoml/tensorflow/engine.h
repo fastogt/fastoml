@@ -30,6 +30,7 @@ namespace tensorflow {
 class Engine : public IEngine {
  public:
   Engine();
+  static const BackendMeta meta;
 
   virtual BackendMeta GetBackendMeta() const override;
 

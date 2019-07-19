@@ -31,8 +31,10 @@ namespace tensorflow {
 
 Engine::Engine() : state_(STOPPED), session_(nullptr), model_(nullptr) {}
 
+const BackendMeta Engine::meta = {TENSORFLOW, "Tensorflow", "Google's TensorFlow", TF_Version()};
+
 BackendMeta Engine::GetBackendMeta() const {
-  return {TENSORFLOW, "Tensorflow", "Google's TensorFlow", TF_Version()};
+  return meta;
 }
 
 common::Error Engine::SetProperty(const std::string& property, common::Value* value) {

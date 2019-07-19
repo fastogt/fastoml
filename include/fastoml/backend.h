@@ -32,10 +32,11 @@ namespace fastoml {
 class IEngine;
 class IModel;
 
-class BackEnd final {
+class Backend final {
  public:
-  static common::Error MakeBackEnd(SupportedBackends code, BackEnd** backend);
+  static common::Error MakeBackEnd(SupportedBackends code, Backend** backend);
   static common::Error GetParameters(SupportedBackends code, const std::vector<ParameterMeta>** params);
+  static common::Error GetMeta(SupportedBackends code, const BackendMeta** meta);
 
   BackendMeta GetMeta() const;
   common::Error SetProperty(const std::string& property, common::Value* value);
@@ -50,16 +51,16 @@ class BackEnd final {
 
   common::Error Stop() WARN_UNUSED_RESULT;
 
-  ~BackEnd();
+  ~Backend();
 
  protected:
-  BackEnd();
+  Backend();
 
  private:
   IEngine* engine_;
   IModel* model_;
 
-  DISALLOW_COPY_AND_ASSIGN(BackEnd);
+  DISALLOW_COPY_AND_ASSIGN(Backend);
 };
 
 }  // namespace fastoml

@@ -92,8 +92,8 @@ std::unique_ptr<float[]> LoadImage(const std::string& path, int reqwidth, int re
 }
 
 TEST(Tensor, Create) {
-  fastoml::BackEnd* back = nullptr;
-  common::Error err = fastoml::BackEnd::MakeBackEnd(fastoml::TENSORFLOW, &back);
+  fastoml::Backend* back = nullptr;
+  common::Error err = fastoml::Backend::MakeBackEnd(fastoml::TENSORFLOW, &back);
   ASSERT_FALSE(err);
   ASSERT_TRUE(back);
 

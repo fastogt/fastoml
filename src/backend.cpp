@@ -24,8 +24,8 @@
 
 namespace fastoml {
 
-common::Error BackEnd::GetParameters(SupportedBackends code, const std::vector<ParameterMeta>** params) {
-  if (code == MAX_BACKENDS || !params) {
+common::Error Backend::GetParameters(SupportedBackends code, const std::vector<ParameterMeta>** params) {
+  if (!params) {
     return common::make_error_inval();
   }
 
@@ -33,42 +33,54 @@ common::Error BackEnd::GetParameters(SupportedBackends code, const std::vector<P
   return common::Error();
 }
 
-BackEnd::BackEnd() : engine_(nullptr), model_(nullptr) {}
+common::Error Backend::GetMeta(SupportedBackends code, const BackendMeta** meta) {
+  if (!meta) {
+    return common::make_error_inval();
+  }
 
-BackendMeta BackEnd::GetMeta() const {
+  if (code == TENSORFLOW) {
+    *meta = &tensorflow::Engine::meta;
+  }
+
+  return common::make_error_inval();
+}
+
+Backend::Backend() : engine_(nullptr), model_(nullptr) {}
+
+BackendMeta Backend::GetMeta() const {
   return engine_->GetBackendMeta();
 }
 
-common::Error BackEnd::SetProperty(const std::string& property, common::Value* value) {
+common::Error Backend::SetProperty(const std::string& property, common::Value* value) {
   return engine_->SetProperty(property, value);
 }
 
-common::Error BackEnd::GetProperty(const std::string& property, common::Value** value) {
+common::Error Backend::GetProperty(const std::string& property, common::Value** value) {
   return engine_->GetProperty(property, value);
 }
 
-common::Error BackEnd::MakeFrame(const common::draw::Size& size, ImageFormat::Type format, void* data, IFrame** frame) {
+common::Error Backend::MakeFrame(const common::draw::Size& size, ImageFormat::Type format, void* data, IFrame** frame) {
   return engine_->MakeFrame(size, format, data, frame);
 }
 
-common::Error BackEnd::LoadGraph(const common::file_system::ascii_file_string_path& path) {
+common::Error Backend::LoadGraph(const common::file_system::ascii_file_string_path& path) {
   return model_->Load(path);
 }
 
-common::Error BackEnd::Start() {
+common::Error Backend::Start() {
   return engine_->Start();
 }
 
-common::Error BackEnd::Predict(IFrame* in_frame, IPrediction** pred) {
+common::Error Backend::Predict(IFrame* in_frame, IPrediction** pred) {
   return engine_->Predict(in_frame, pred);
 }
 
-common::Error BackEnd::Stop() {
+common::Error Backend::Stop() {
   return engine_->Stop();
 }
 
-common::Error BackEnd::MakeBackEnd(SupportedBackends code, BackEnd** backend) {
-  if (code == MAX_BACKENDS || !backend) {
+common::Error Backend::MakeBackEnd(SupportedBackends code, Backend** backend) {
+  if (!backend) {
     return common::make_error_inval();
   }
 
@@ -79,14 +91,14 @@ common::Error BackEnd::MakeBackEnd(SupportedBackends code, BackEnd** backend) {
     return err;
   }
 
-  BackEnd* back = new BackEnd;
+  Backend* back = new Backend;
   back->model_ = model;
   back->engine_ = engine;
   *backend = back;
   return common::Error();
 }
 
-BackEnd::~BackEnd() {
+Backend::~Backend() {
   destroy(&engine_);
   destroy(&model_);
 }

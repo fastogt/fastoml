@@ -32,6 +32,6 @@ class ImageFormat {
   Type type_;
 };
 
-enum SupportedBackends { TENSORFLOW = 0, MAX_BACKENDS };
+enum SupportedBackends { TENSORFLOW = 0 };
 
 }  // namespace fastoml
