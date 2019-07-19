@@ -47,12 +47,20 @@ common::Error BackEnd::GetProperty(const std::string& property, common::Value** 
   return engine_->GetProperty(property, value);
 }
 
+common::Error BackEnd::MakeFrame(const common::draw::Size& size, ImageFormat::Type format, void* data, IFrame** frame) {
+  return engine_->MakeFrame(size, format, data, frame);
+}
+
 common::Error BackEnd::LoadGraph(const common::file_system::ascii_file_string_path& path) {
   return model_->Load(path);
 }
 
 common::Error BackEnd::Start() {
   return engine_->Start();
+}
+
+common::Error BackEnd::Predict(IFrame* in_frame, IPrediction** pred) {
+  return engine_->Predict(in_frame, pred);
 }
 
 common::Error BackEnd::Stop() {

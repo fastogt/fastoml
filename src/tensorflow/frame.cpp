@@ -21,6 +21,9 @@
 #include <memory>
 
 #include <fastoml/tensorflow/types.h>
+namespace {
+void DummyDeallocator(void*, size_t, void*) {}
+}  // namespace
 
 namespace fastoml {
 namespace tensorflow {
@@ -35,7 +38,7 @@ common::Error MakeTensor(TF_DataType type,
     return common::make_error_inval();
   }
 
-  TF_Tensor* raw_tensor = TF_NewTensor(type, dims, num_dims, data, size, nullptr, nullptr);
+  TF_Tensor* raw_tensor = TF_NewTensor(type, dims, num_dims, data, size, DummyDeallocator, nullptr);
   if (!raw_tensor) {
     return common::make_error("Unable to create tensor");
   }
@@ -94,29 +97,30 @@ common::Error Frame::GetTensorShape(TF_Graph* graph,
 }
 
 common::Error Frame::Validate(int64_t* dims, int64_t num_dims) {
-  if (num_dims < 3) {
+  if (num_dims <= 3) {
     return common::make_error_inval();
   }
 
   /* We only support 1 batch */
-  if (1 != dims[0]) {
+  if (dims[0] != 1) {
     return common::make_error("We only support a batch of 1 image(s) in our frames");
   }
 
+  common::draw::Size size = GetSize();
   /* Check that widths match */
-  if (GetSize().width != dims[1]) {
+  if (dims[1] != size.width) {
     return common::make_error("Unsupported image width");
   }
 
   /* Check that heights match */
-  if (GetSize().height != dims[2]) {
+  if (dims[2] != size.height) {
     return common::make_error("Unsupported image height");
   }
 
   /* Check that channels match
    * TODO: relate this to the input format
    */
-  if (3 != dims[3]) {
+  if (dims[3] != 3) {
     return common::make_error("We only support a 3 channels per image");
   }
 
@@ -142,26 +146,29 @@ common::Error Frame::GetOrCreateTensor(TF_Graph* graph, TF_Operation* operation,
     return err;
   }
 
+  std::unique_ptr<int64_t[]> pldims(dims);
   err = Validate(dims, num_dims);
   if (err) {
-    delete[] dims;
     return err;
   }
 
   TF_Tensor* ltensor = nullptr;
   err = MakeTensor(type, dims, num_dims, GetData(), size, &ltensor);
   if (err) {
-    delete[] dims;
     return err;
   }
 
-  delete[] dims;
   tensor_ = ltensor;
   *tensor = tensor_;
   return common::Error();
 }
 
-Frame::~Frame() {}
+Frame::~Frame() {
+  if (tensor_) {
+    TF_DeleteTensor(tensor_);
+    tensor_ = nullptr;
+  }
+}
 
 }  // namespace tensorflow
 }  // namespace fastoml

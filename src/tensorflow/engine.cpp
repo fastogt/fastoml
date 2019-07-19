@@ -110,6 +110,15 @@ common::Error Engine::GetProperty(const std::string& property, common::Value** v
   return common::make_error("Propery not found");
 }
 
+common::Error Engine::MakeFrame(const common::draw::Size& size, ImageFormat::Type format, void* data, IFrame** frame) {
+  if (!frame) {
+    return common::make_error_inval();
+  }
+
+  *frame = new Frame(size, format, data);
+  return common::Error();
+}
+
 common::Error Engine::SetModel(IModel* in_model) {
   if (!in_model) {
     return common::make_error("Received null model");
@@ -171,6 +180,22 @@ common::Error Engine::Stop() {
     return common::make_error("Engine already stopped");
   }
 
+  if (session_) {
+    tf_status_locker_t pstatus(TF_NewStatus(), TF_DeleteStatus);
+    if (pstatus) {
+      TF_Status* status = pstatus.get();
+      TF_CloseSession(session_, status);
+      if (TF_OK != TF_GetCode(status)) {
+        return common::make_error(TF_Message(status));
+      }
+      TF_DeleteSession(session_, status);
+      if (TF_OK != TF_GetCode(status)) {
+        return common::make_error(TF_Message(status));
+      }
+    }
+    session_ = nullptr;
+  }
+
   state_ = State::STOPPED;
   return common::Error();
 }
@@ -186,13 +211,13 @@ common::Error Engine::Predict(IFrame* in_frame, IPrediction** pred) {
 
   Model* model = static_cast<Model*>(model_);
   /* These pointers are validated during load */
-  TF_Graph* pgraph = model->GetGraph();
+  TF_Graph* graph = model->GetGraph();
   TF_Operation* out_operation = model->GetOutputOperation();
   TF_Operation* in_operation = model->GetInputOperation();
   Frame* frame = static_cast<Frame*>(in_frame);
 
-  TF_Tensor* pin_tensor = nullptr;
-  common::Error err = frame->GetOrCreateTensor(pgraph, in_operation, &pin_tensor);
+  TF_Tensor* in_tensor = nullptr;
+  common::Error err = frame->GetOrCreateTensor(graph, in_operation, &in_tensor);
   if (err) {
     return err;
   }
@@ -202,7 +227,6 @@ common::Error Engine::Predict(IFrame* in_frame, IPrediction** pred) {
     return common::make_error("Cannot allocate status");
   }
 
-  TF_Tensor* in_tensor = pin_tensor;
   Prediction* lpred = new Prediction;
   TF_Status* status = pstatus.get();
 
@@ -220,7 +244,7 @@ common::Error Engine::Predict(IFrame* in_frame, IPrediction** pred) {
     return common::make_error(TF_Message(status));
   }
 
-  lpred->SetTensor(pgraph, out_operation, out_tensor);
+  lpred->SetTensor(graph, out_operation, out_tensor);
   *pred = lpred;
   return common::Error();
 }

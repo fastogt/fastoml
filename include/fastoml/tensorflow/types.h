@@ -29,6 +29,6 @@ typedef const std::unique_ptr<TF_ImportGraphDefOptions, decltype(&TF_DeleteImpor
     tf_importgraphdefopt_locker_t;
 typedef const std::unique_ptr<TF_SessionOptions, decltype(&TF_DeleteSessionOptions)> tf_sessionoptions_locker_t;
 
-size_t GetRequiredBufferSize(int64_t* dims, int64_t num_dims, size_t type_size);
+size_t GetRequiredBufferSize(const int64_t* dims, int64_t num_dims, size_t type_size);
 }  // namespace tensorflow
 }  // namespace fastoml

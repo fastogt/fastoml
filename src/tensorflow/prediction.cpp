@@ -36,7 +36,7 @@ common::Error Prediction::At(size_t index, float* val) {
   }
 
   float* fdata = static_cast<float*>(GetResultData());
-  if (nullptr == fdata) {
+  if (!fdata) {
     return common::make_error("Prediction result not set yet");
   }
 
@@ -45,7 +45,7 @@ common::Error Prediction::At(size_t index, float* val) {
 }
 
 void* Prediction::GetResultData() {
-  if (tensor_) {
+  if (!tensor_) {
     return nullptr;
   }
 
@@ -73,7 +73,8 @@ common::Error Prediction::SetTensor(TF_Graph* graph, TF_Operation* operation, TF
     return common::make_error(TF_Message(status));
   }
 
-  int64_t* ldims = new int64_t[lnum_dims];
+  std::unique_ptr<int64_t[]> pldims(new int64_t[lnum_dims]);
+  int64_t* ldims = pldims.get();
   TF_GraphGetTensorShape(graph, output, ldims, lnum_dims, status);
   if (TF_GetCode(status) != TF_OK) {
     return common::make_error(TF_Message(status));

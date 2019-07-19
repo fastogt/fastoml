@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <common/draw/types.h>
 #include <common/error.h>
 #include <common/value.h>
 
@@ -35,6 +36,11 @@ class IEngine {
 
   virtual common::Error SetProperty(const std::string& property, common::Value* value) = 0;
   virtual common::Error GetProperty(const std::string& property, common::Value** value) = 0;
+
+  virtual common::Error MakeFrame(const common::draw::Size& size,
+                                  ImageFormat::Type format,
+                                  void* data,
+                                  IFrame** frame) = 0;
 
   virtual common::Error SetModel(IModel* in_model) = 0;
   virtual common::Error Start() = 0;

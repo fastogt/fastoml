@@ -127,11 +127,11 @@ TF_Graph* Model::GetGraph() const {
 }
 
 TF_Operation* Model::GetOutputOperation() const {
-  return in_operation_;
+  return out_operation_;
 }
 
 TF_Operation* Model::GetInputOperation() const {
-  return out_operation_;
+  return in_operation_;
 }
 
 common::Error Model::Load(TF_Buffer* buffer) {

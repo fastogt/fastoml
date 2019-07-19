@@ -36,6 +36,11 @@ class Engine : public IEngine {
   virtual common::Error SetProperty(const std::string& property, common::Value* value) override;
   virtual common::Error GetProperty(const std::string& property, common::Value** value) override;
 
+  virtual common::Error MakeFrame(const common::draw::Size& size,
+                                  ImageFormat::Type format,
+                                  void* data,
+                                  IFrame** frame) override;
+
   virtual common::Error SetModel(IModel* in_model) override;
   virtual common::Error Start() override;
   virtual common::Error Stop() override;

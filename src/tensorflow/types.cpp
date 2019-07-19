@@ -21,7 +21,7 @@
 namespace fastoml {
 namespace tensorflow {
 
-size_t GetRequiredBufferSize(int64_t* dims, int64_t num_dims, size_t type_size) {
+size_t GetRequiredBufferSize(const int64_t* dims, int64_t num_dims, size_t type_size) {
   size_t size = 1;
 
   /* For each dimension, multiply the amount of entries */

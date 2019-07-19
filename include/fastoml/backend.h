@@ -23,6 +23,8 @@
 #include <common/value.h>
 
 #include <fastoml/backend_meta.h>
+#include <fastoml/iframe.h>
+#include <fastoml/iprediction.h>
 #include <fastoml/parameter_meta.h>
 
 namespace fastoml {
@@ -39,8 +41,13 @@ class BackEnd final {
   common::Error SetProperty(const std::string& property, common::Value* value);
   common::Error GetProperty(const std::string& property, common::Value** value);
 
+  common::Error MakeFrame(const common::draw::Size& size, ImageFormat::Type format, void* data, IFrame** frame)
+      WARN_UNUSED_RESULT;
+
   common::Error LoadGraph(const common::file_system::ascii_file_string_path& path) WARN_UNUSED_RESULT;
   common::Error Start() WARN_UNUSED_RESULT;
+  common::Error Predict(IFrame* in_frame, IPrediction** pred) WARN_UNUSED_RESULT;
+
   common::Error Stop() WARN_UNUSED_RESULT;
 
   ~BackEnd();
