@@ -14,8 +14,8 @@ SET(PROJECT_COPYRIGHT "Copyright (C) 2014-2019 ${PROJECT_COMPANYNAME}. All Right
 SET(PROJECT_COMPANYNAME_DOMAIN "www.fastogt.com" CACHE STRING "Internet domain name for ${PROJECT_NAME}")
 SET(PROJECT_MAINTAINER_MAIL "atopilski@fastogt.com" CACHE STRING "Internet mail address for ${PROJECT_NAME} mainteiner")
 SET(PROJECT_MAINTAINER_NAME "Alexandr Topilski" CACHE STRING "Name of ${PROJECT_NAME} mainteiner")
-SET(PROJECT_GITHUB_FORK "www.github.com/fastogt/fastotv" CACHE STRING "Git fork of ${PROJECT_NAME}")
-SET(PROJECT_GITHUB_ISSUES "www.github.com/fastogt/fastotv/issues" CACHE STRING "Git issue link for ${PROJECT_NAME}")
+SET(PROJECT_GITHUB_FORK "www.github.com/fastogt/fastoml" CACHE STRING "Git fork of ${PROJECT_NAME}")
+SET(PROJECT_GITHUB_ISSUES "www.github.com/fastogt/fastoml/issues" CACHE STRING "Git issue link for ${PROJECT_NAME}")
 SET(PROJECT_BUILD_TYPE_VERSION "rc") #alfa, beta, rc, release
 
 SET(PROJECT_SUMMARY "Cross-platform open source player."
