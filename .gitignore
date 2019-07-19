@@ -34,3 +34,4 @@
 # fastogt
 build_cmake
 CMakeLists.txt.user
+include/fastoml/config.h
