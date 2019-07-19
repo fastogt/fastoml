@@ -20,6 +20,8 @@
 
 #include <common/file_system/file.h>
 
+#include <fastoml/tensorflow/types.h>
+
 namespace {
 void free_buffer(void* data, size_t) {
   free(data);
@@ -134,25 +136,41 @@ TF_Operation* Model::GetInputOperation() const {
 
 common::Error Model::Load(TF_Buffer* buffer) {
   if (!buffer) {
+    TF_DeleteBuffer(buffer);
     return common::make_error_inval();
   }
 
   if (graph_) {
+    TF_DeleteBuffer(buffer);
     return common::make_error_inval();
   }
 
-  TF_Status* lstatus = TF_NewStatus();
-  TF_Graph* lgraph = TF_NewGraph();
-  TF_ImportGraphDefOptions* lgopts = TF_NewImportGraphDefOptions();
-  TF_GraphImportGraphDef(lgraph, buffer, lgopts, lstatus);
+  tf_status_locker_t pstatus(TF_NewStatus(), TF_DeleteStatus);
+  if (!pstatus) {
+    TF_DeleteBuffer(buffer);
+    return common::make_error("Cannot allocate status");
+  }
 
-  TF_Code code = TF_GetCode(lstatus);
+  tf_importgraphdefopt_locker_t pgopts(TF_NewImportGraphDefOptions(), TF_DeleteImportGraphDefOptions);
+  if (!pgopts) {
+    TF_DeleteBuffer(buffer);
+    return common::make_error("Cannot allocate graph options");
+  }
+
+  TF_Status* status = pstatus.get();
+  TF_Graph* graph = TF_NewGraph();
+  TF_ImportGraphDefOptions* gopts = pgopts.get();
+  TF_GraphImportGraphDef(graph, buffer, gopts, status);
+
+  TF_Code code = TF_GetCode(status);
   if (code != TF_OK) {
-    return common::make_error(TF_Message(lstatus));
+    TF_DeleteBuffer(buffer);
+    TF_DeleteGraph(graph);
+    return common::make_error(TF_Message(status));
   }
 
   buffer_ = buffer;
-  graph_ = lgraph;
+  graph_ = graph;
   return common::Error();
 }
 

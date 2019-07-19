@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include <fastoml/backend.h>
+#include <fastoml/tensorflow/parameters.h>
 
 #define PB_YOLOV2_FILEPATH PROJECT_TEST_SOURCES_DIR "/data/graph_tinyyolov2_tensorflow.pb"
 
@@ -32,6 +33,16 @@ TEST(Tensor, Create) {
   ASSERT_EQ(fastoml::TENSORFLOW, meta.code);
   err = back->LoadGraph(common::file_system::ascii_file_string_path(PB_YOLOV2_FILEPATH));
   ASSERT_FALSE(err);
+
+  common::Value* input_layer_value = common::Value::CreateStringValueFromBasicString("input/Placeholder");
+  err = back->SetProperty(INPUT_LAYER_PROPERTY, input_layer_value);
+  ASSERT_FALSE(err);
+  delete input_layer_value;
+
+  common::Value* output_layer_value = common::Value::CreateStringValueFromBasicString("add_8");
+  err = back->SetProperty(OUTPUT_LAYER_PROPERTY, output_layer_value);
+  ASSERT_FALSE(err);
+  delete output_layer_value;
 
   err = back->Start();
   ASSERT_FALSE(err);

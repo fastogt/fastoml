@@ -24,6 +24,7 @@
 #include <fastoml/tensorflow/model.h>
 #include <fastoml/tensorflow/parameters.h>
 #include <fastoml/tensorflow/prediction.h>
+#include <fastoml/tensorflow/types.h>
 
 namespace fastoml {
 namespace tensorflow {
@@ -135,10 +136,20 @@ common::Error Engine::Start() {
     return common::make_error("Model not set yet");
   }
 
+  tf_status_locker_t pstatus(TF_NewStatus(), TF_DeleteStatus);
+  if (!pstatus) {
+    return common::make_error("Cannot allocate status");
+  }
+
+  tf_sessionoptions_locker_t popt(TF_NewSessionOptions(), TF_DeleteSessionOptions);
+  if (!popt) {
+    return common::make_error("Cannot allocate session opt");
+  }
+
   Model* model = static_cast<Model*>(model_);
   TF_Graph* graph = model->GetGraph();
-  TF_Status* status = TF_NewStatus();
-  TF_SessionOptions* opt = TF_NewSessionOptions();
+  TF_Status* status = pstatus.get();
+  TF_SessionOptions* opt = popt.get();
 
   TF_Session* session = TF_NewSession(graph, opt, status);
   if (TF_GetCode(status) != TF_OK) {
@@ -186,9 +197,14 @@ common::Error Engine::Predict(IFrame* in_frame, IPrediction** pred) {
     return err;
   }
 
+  tf_status_locker_t pstatus(TF_NewStatus(), TF_DeleteStatus);
+  if (!pstatus) {
+    return common::make_error("Cannot allocate status");
+  }
+
   TF_Tensor* in_tensor = pin_tensor;
   Prediction* lpred = new Prediction;
-  TF_Status* status = TF_NewStatus();
+  TF_Status* status = pstatus.get();
 
   TF_Output run_outputs = {out_operation, 0};
   TF_Output run_inputs = {in_operation, 0};
