@@ -29,8 +29,8 @@ class Model : public IModel {
  public:
   Model();
 
-  virtual common::Error Load(const common::file_system::ascii_file_string_path& path) override WARN_UNUSED_RESULT;
-  virtual common::Error Start() override WARN_UNUSED_RESULT;
+  virtual common::ErrnoError Load(const common::file_system::ascii_file_string_path& path) override WARN_UNUSED_RESULT;
+  virtual common::ErrnoError Start() override WARN_UNUSED_RESULT;
   virtual ~Model() override;
 
   std::string GetInputLayerName() const;
@@ -45,7 +45,7 @@ class Model : public IModel {
   TF_Operation* GetInputOperation() const;
 
  private:
-  common::Error Load(TF_Buffer* buffer);
+  common::ErrnoError Load(TF_Buffer* buffer);
 
   TF_Graph* graph_;
   TF_Buffer* buffer_;

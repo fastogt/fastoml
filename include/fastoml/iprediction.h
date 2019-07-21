@@ -24,7 +24,7 @@ namespace fastoml {
 
 class IPrediction {
  public:
-  virtual common::Error At(size_t index, float* val) = 0;
+  virtual common::ErrnoError At(size_t index, float* val) = 0;
   virtual void* GetResultData() = 0;
   virtual size_t GetResultSize() const = 0;
   virtual ~IPrediction();

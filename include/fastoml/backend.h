@@ -34,22 +34,22 @@ class IModel;
 
 class Backend final {
  public:
-  static common::Error MakeBackEnd(SupportedBackends code, Backend** backend);
-  static common::Error GetParameters(SupportedBackends code, const std::vector<ParameterMeta>** params);
-  static common::Error GetMeta(SupportedBackends code, const BackendMeta** meta);
+  static common::ErrnoError MakeBackEnd(SupportedBackends code, Backend** backend);
+  static common::ErrnoError GetParameters(SupportedBackends code, const std::vector<ParameterMeta>** params);
+  static common::ErrnoError GetMeta(SupportedBackends code, const BackendMeta** meta);
 
   BackendMeta GetMeta() const;
-  common::Error SetProperty(const std::string& property, common::Value* value);
-  common::Error GetProperty(const std::string& property, common::Value** value);
+  common::ErrnoError SetProperty(const std::string& property, common::Value* value);
+  common::ErrnoError GetProperty(const std::string& property, common::Value** value);
 
-  common::Error MakeFrame(const common::draw::Size& size, ImageFormat::Type format, void* data, IFrame** frame)
+  common::ErrnoError MakeFrame(const common::draw::Size& size, ImageFormat::Type format, void* data, IFrame** frame)
       WARN_UNUSED_RESULT;
 
-  common::Error LoadGraph(const common::file_system::ascii_file_string_path& path) WARN_UNUSED_RESULT;
-  common::Error Start() WARN_UNUSED_RESULT;
-  common::Error Predict(IFrame* in_frame, IPrediction** pred) WARN_UNUSED_RESULT;
+  common::ErrnoError LoadGraph(const common::file_system::ascii_file_string_path& path) WARN_UNUSED_RESULT;
+  common::ErrnoError Start() WARN_UNUSED_RESULT;
+  common::ErrnoError Predict(IFrame* in_frame, IPrediction** pred) WARN_UNUSED_RESULT;
 
-  common::Error Stop() WARN_UNUSED_RESULT;
+  common::ErrnoError Stop() WARN_UNUSED_RESULT;
 
   ~Backend();
 

@@ -29,11 +29,11 @@ class Prediction : public IPrediction {
  public:
   Prediction();
 
-  virtual common::Error At(size_t index, float* val) override;
+  virtual common::ErrnoError At(size_t index, float* val) override;
   virtual void* GetResultData() override;
   virtual size_t GetResultSize() const override;
 
-  common::Error SetTensor(TF_Graph* graph, TF_Operation* operation, TF_Tensor* tensor);
+  common::ErrnoError SetTensor(TF_Graph* graph, TF_Operation* operation, TF_Tensor* tensor);
 
   virtual ~Prediction() override;
 

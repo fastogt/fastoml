@@ -24,25 +24,25 @@
 
 namespace fastoml {
 
-common::Error Backend::GetParameters(SupportedBackends code, const std::vector<ParameterMeta>** params) {
+common::ErrnoError Backend::GetParameters(SupportedBackends code, const std::vector<ParameterMeta>** params) {
   if (!params) {
-    return common::make_error_inval();
+    return common::make_errno_error_inval();
   }
 
   *params = &tensorflow::kParameters;
-  return common::Error();
+  return common::ErrnoError();
 }
 
-common::Error Backend::GetMeta(SupportedBackends code, const BackendMeta** meta) {
+common::ErrnoError Backend::GetMeta(SupportedBackends code, const BackendMeta** meta) {
   if (!meta) {
-    return common::make_error_inval();
+    return common::make_errno_error_inval();
   }
 
   if (code == TENSORFLOW) {
     *meta = &tensorflow::Engine::meta;
   }
 
-  return common::make_error_inval();
+  return common::make_errno_error_inval();
 }
 
 Backend::Backend() : engine_(nullptr), model_(nullptr) {}
@@ -51,42 +51,45 @@ BackendMeta Backend::GetMeta() const {
   return engine_->GetBackendMeta();
 }
 
-common::Error Backend::SetProperty(const std::string& property, common::Value* value) {
+common::ErrnoError Backend::SetProperty(const std::string& property, common::Value* value) {
   return engine_->SetProperty(property, value);
 }
 
-common::Error Backend::GetProperty(const std::string& property, common::Value** value) {
+common::ErrnoError Backend::GetProperty(const std::string& property, common::Value** value) {
   return engine_->GetProperty(property, value);
 }
 
-common::Error Backend::MakeFrame(const common::draw::Size& size, ImageFormat::Type format, void* data, IFrame** frame) {
+common::ErrnoError Backend::MakeFrame(const common::draw::Size& size,
+                                      ImageFormat::Type format,
+                                      void* data,
+                                      IFrame** frame) {
   return engine_->MakeFrame(size, format, data, frame);
 }
 
-common::Error Backend::LoadGraph(const common::file_system::ascii_file_string_path& path) {
+common::ErrnoError Backend::LoadGraph(const common::file_system::ascii_file_string_path& path) {
   return model_->Load(path);
 }
 
-common::Error Backend::Start() {
+common::ErrnoError Backend::Start() {
   return engine_->Start();
 }
 
-common::Error Backend::Predict(IFrame* in_frame, IPrediction** pred) {
+common::ErrnoError Backend::Predict(IFrame* in_frame, IPrediction** pred) {
   return engine_->Predict(in_frame, pred);
 }
 
-common::Error Backend::Stop() {
+common::ErrnoError Backend::Stop() {
   return engine_->Stop();
 }
 
-common::Error Backend::MakeBackEnd(SupportedBackends code, Backend** backend) {
+common::ErrnoError Backend::MakeBackEnd(SupportedBackends code, Backend** backend) {
   if (!backend) {
-    return common::make_error_inval();
+    return common::make_errno_error_inval();
   }
 
   fastoml::IModel* model = new fastoml::tensorflow::Model;
   fastoml::IEngine* engine = new fastoml::tensorflow::Engine;
-  common::Error err = engine->SetModel(model);
+  common::ErrnoError err = engine->SetModel(model);
   if (err) {
     return err;
   }
@@ -95,7 +98,7 @@ common::Error Backend::MakeBackEnd(SupportedBackends code, Backend** backend) {
   back->model_ = model;
   back->engine_ = engine;
   *backend = back;
-  return common::Error();
+  return common::ErrnoError();
 }
 
 Backend::~Backend() {

@@ -34,18 +34,18 @@ class Engine : public IEngine {
 
   virtual BackendMeta GetBackendMeta() const override;
 
-  virtual common::Error SetProperty(const std::string& property, common::Value* value) override;
-  virtual common::Error GetProperty(const std::string& property, common::Value** value) override;
+  virtual common::ErrnoError SetProperty(const std::string& property, common::Value* value) override;
+  virtual common::ErrnoError GetProperty(const std::string& property, common::Value** value) override;
 
-  virtual common::Error MakeFrame(const common::draw::Size& size,
-                                  ImageFormat::Type format,
-                                  void* data,
-                                  IFrame** frame) override;
+  virtual common::ErrnoError MakeFrame(const common::draw::Size& size,
+                                       ImageFormat::Type format,
+                                       void* data,
+                                       IFrame** frame) override;
 
-  virtual common::Error SetModel(IModel* in_model) override;
-  virtual common::Error Start() override;
-  virtual common::Error Stop() override;
-  virtual common::Error Predict(IFrame* in_frame, IPrediction** pred) override;
+  virtual common::ErrnoError SetModel(IModel* in_model) override;
+  virtual common::ErrnoError Start() override;
+  virtual common::ErrnoError Stop() override;
+  virtual common::ErrnoError Predict(IFrame* in_frame, IPrediction** pred) override;
 
   virtual ~Engine() override;
 

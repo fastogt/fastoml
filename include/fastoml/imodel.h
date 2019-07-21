@@ -26,8 +26,8 @@ namespace fastoml {
 
 class IModel {
  public:
-  virtual common::Error Load(const common::file_system::ascii_file_string_path& path) WARN_UNUSED_RESULT = 0;
-  virtual common::Error Start() WARN_UNUSED_RESULT = 0;
+  virtual common::ErrnoError Load(const common::file_system::ascii_file_string_path& path) WARN_UNUSED_RESULT = 0;
+  virtual common::ErrnoError Start() WARN_UNUSED_RESULT = 0;
   virtual ~IModel();
 };
 

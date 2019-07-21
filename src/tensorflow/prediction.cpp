@@ -25,23 +25,23 @@ namespace tensorflow {
 
 Prediction::Prediction() : tensor_(nullptr), result_size_(0) {}
 
-common::Error Prediction::At(size_t index, float* val) {
+common::ErrnoError Prediction::At(size_t index, float* val) {
   if (!tensor_) {
-    return common::make_error("Prediction was not properly initialized");
+    return common::make_errno_error("Prediction was not properly initialized", EINVAL);
   }
 
   size_t n_results = GetResultSize() / sizeof(float);
   if (n_results < index) {
-    return common::make_error("Triying to access an non-existing index");
+    return common::make_errno_error("Triying to access an non-existing index", EINVAL);
   }
 
   float* fdata = static_cast<float*>(GetResultData());
   if (!fdata) {
-    return common::make_error("Prediction result not set yet");
+    return common::make_errno_error("Prediction result not set yet", ENOMEM);
   }
 
   *val = fdata[index];
-  return common::Error();
+  return common::ErrnoError();
 }
 
 void* Prediction::GetResultData() {
@@ -56,28 +56,28 @@ size_t Prediction::GetResultSize() const {
   return result_size_;
 }
 
-common::Error Prediction::SetTensor(TF_Graph* graph, TF_Operation* operation, TF_Tensor* tensor) {
+common::ErrnoError Prediction::SetTensor(TF_Graph* graph, TF_Operation* operation, TF_Tensor* tensor) {
   if (!graph || !operation || !tensor) {
-    return common::make_error_inval();
+    return common::make_errno_error_inval();
   }
 
   TF_Output output = {operation, 0};
   tf_status_locker_t pstatus(TF_NewStatus(), TF_DeleteStatus);
   if (!pstatus) {
-    return common::make_error("Cannot allocate status");
+    return common::make_errno_error("Cannot allocate status", EINVAL);
   }
 
   TF_Status* status = pstatus.get();
   int lnum_dims = TF_GraphGetTensorNumDims(graph, output, status);
   if (TF_GetCode(status) != TF_OK) {
-    return common::make_error(TF_Message(status));
+    return common::make_errno_error(TF_Message(status), EINTR);
   }
 
   std::unique_ptr<int64_t[]> pldims(new int64_t[lnum_dims]);
   int64_t* ldims = pldims.get();
   TF_GraphGetTensorShape(graph, output, ldims, lnum_dims, status);
   if (TF_GetCode(status) != TF_OK) {
-    return common::make_error(TF_Message(status));
+    return common::make_errno_error(TF_Message(status), EINTR);
   }
 
   ldims[0] = 1;
@@ -87,12 +87,12 @@ common::Error Prediction::SetTensor(TF_Graph* graph, TF_Operation* operation, TF
   size_t data_size = GetRequiredBufferSize(ldims, lnum_dims, type_size);
 
   if (TF_FLOAT != type) {
-    return common::make_error("The output of this model is not floating point");
+    return common::make_errno_error("The output of this model is not floating point", EINTR);
   }
 
   tensor_ = tensor;
   result_size_ = data_size;
-  return common::Error();
+  return common::ErrnoError();
 }
 
 Prediction::~Prediction() {}

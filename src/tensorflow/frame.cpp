@@ -28,59 +28,59 @@ void DummyDeallocator(void*, size_t, void*) {}
 namespace fastoml {
 namespace tensorflow {
 
-common::Error MakeTensor(TF_DataType type,
-                         const int64_t* dims,
-                         int num_dims,
-                         void* data,
-                         size_t size,
-                         TF_Tensor** tensor) {
+common::ErrnoError MakeTensor(TF_DataType type,
+                              const int64_t* dims,
+                              int num_dims,
+                              void* data,
+                              size_t size,
+                              TF_Tensor** tensor) {
   if (!tensor) {
-    return common::make_error_inval();
+    return common::make_errno_error_inval();
   }
 
   TF_Tensor* raw_tensor = TF_NewTensor(type, dims, num_dims, data, size, DummyDeallocator, nullptr);
   if (!raw_tensor) {
-    return common::make_error("Unable to create tensor");
+    return common::make_errno_error("Unable to create tensor", ENOMEM);
   }
 
   *tensor = raw_tensor;
-  return common::Error();
+  return common::ErrnoError();
 }
 
 Frame::Frame(const common::draw::Size& size, ImageFormat::Type format, data_t data)
     : base_class(size, format, data), tensor_(nullptr) {}
 
-common::Error Frame::GetTensorShape(TF_Graph* graph,
-                                    TF_Operation* operation,
-                                    TF_DataType* type,
-                                    int64_t** dims,
-                                    int* num_dims,
-                                    size_t* size) {
+common::ErrnoError Frame::GetTensorShape(TF_Graph* graph,
+                                         TF_Operation* operation,
+                                         TF_DataType* type,
+                                         int64_t** dims,
+                                         int* num_dims,
+                                         size_t* size) {
   if (!graph) {
-    return common::make_error("Attempting to validate frame with NULL graph");
+    return common::make_errno_error("Attempting to validate frame with NULL graph", EINVAL);
   }
 
   if (!operation) {
-    return common::make_error("Attempting to validate frame with NULL operation");
+    return common::make_errno_error("Attempting to validate frame with NULL operation", EINVAL);
   }
 
   TF_Output output = {operation, 0};
   tf_status_locker_t pstatus(TF_NewStatus(), TF_DeleteStatus);
   if (!pstatus) {
-    return common::make_error("Cannot allocate status");
+    return common::make_errno_error("Cannot allocate status", ENOMEM);
   }
 
   TF_Status* status = pstatus.get();
   int lnum_dims = TF_GraphGetTensorNumDims(graph, output, status);
   if (TF_GetCode(status) != TF_OK) {
-    return common::make_error(TF_Message(status));
+    return common::make_errno_error(TF_Message(status), EINTR);
   }
 
   int64_t* ldims = new int64_t[lnum_dims];
   TF_GraphGetTensorShape(graph, output, ldims, lnum_dims, status);
   if (TF_GetCode(status) != TF_OK) {
     delete[] ldims;
-    return common::make_error(TF_Message(status));
+    return common::make_errno_error(TF_Message(status), EINTR);
   }
 
   ldims[0] = 1;
@@ -93,55 +93,55 @@ common::Error Frame::GetTensorShape(TF_Graph* graph,
   *dims = ldims;
   *num_dims = lnum_dims;
   *size = data_size;
-  return common::Error();
+  return common::ErrnoError();
 }
 
-common::Error Frame::Validate(int64_t* dims, int64_t num_dims) {
+common::ErrnoError Frame::Validate(int64_t* dims, int64_t num_dims) {
   if (num_dims <= 3) {
-    return common::make_error_inval();
+    return common::make_errno_error_inval();
   }
 
   /* We only support 1 batch */
   if (dims[0] != 1) {
-    return common::make_error("We only support a batch of 1 image(s) in our frames");
+    return common::make_errno_error("We only support a batch of 1 image(s) in our frames", EINVAL);
   }
 
   common::draw::Size size = GetSize();
   /* Check that widths match */
   if (dims[1] != size.width) {
-    return common::make_error("Unsupported image width");
+    return common::make_errno_error("Unsupported image width", EINVAL);
   }
 
   /* Check that heights match */
   if (dims[2] != size.height) {
-    return common::make_error("Unsupported image height");
+    return common::make_errno_error("Unsupported image height", EINVAL);
   }
 
   /* Check that channels match
    * TODO: relate this to the input format
    */
   if (dims[3] != 3) {
-    return common::make_error("We only support a 3 channels per image");
+    return common::make_errno_error("We only support a 3 channels per image", EINVAL);
   }
 
-  return common::Error();
+  return common::ErrnoError();
 }
 
-common::Error Frame::GetOrCreateTensor(TF_Graph* graph, TF_Operation* operation, TF_Tensor** tensor) {
+common::ErrnoError Frame::GetOrCreateTensor(TF_Graph* graph, TF_Operation* operation, TF_Tensor** tensor) {
   if (!tensor || !graph || !operation) {
-    return common::make_error_inval();
+    return common::make_errno_error_inval();
   }
 
   if (tensor_) {
     *tensor = tensor_;
-    return common::Error();
+    return common::ErrnoError();
   }
 
   TF_DataType type;
   int64_t* dims = nullptr;
   int num_dims = 0;
   size_t size = 0;
-  common::Error err = GetTensorShape(graph, operation, &type, &dims, &num_dims, &size);
+  common::ErrnoError err = GetTensorShape(graph, operation, &type, &dims, &num_dims, &size);
   if (err) {
     return err;
   }
@@ -160,7 +160,7 @@ common::Error Frame::GetOrCreateTensor(TF_Graph* graph, TF_Operation* operation,
 
   tensor_ = ltensor;
   *tensor = tensor_;
-  return common::Error();
+  return common::ErrnoError();
 }
 
 Frame::~Frame() {

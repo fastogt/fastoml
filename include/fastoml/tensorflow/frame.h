@@ -25,30 +25,30 @@
 namespace fastoml {
 namespace tensorflow {
 
-common::Error MakeTensor(TF_DataType type,
-                         const int64_t* dims,
-                         int num_dims,
-                         void* data,
-                         size_t size,
-                         TF_Tensor** tensor);
+common::ErrnoError MakeTensor(TF_DataType type,
+                              const int64_t* dims,
+                              int num_dims,
+                              void* data,
+                              size_t size,
+                              TF_Tensor** tensor);
 
 class Frame : public IFrame {
  public:
   typedef IFrame base_class;
   Frame(const common::draw::Size& size, ImageFormat::Type format, data_t data);
 
-  common::Error GetOrCreateTensor(TF_Graph* graph, TF_Operation* operation, TF_Tensor** tensor);
+  common::ErrnoError GetOrCreateTensor(TF_Graph* graph, TF_Operation* operation, TF_Tensor** tensor);
 
   virtual ~Frame() override;
 
  private:
-  common::Error GetTensorShape(TF_Graph* graph,
-                               TF_Operation* operation,
-                               TF_DataType* type,
-                               int64_t** dims,
-                               int* num_dims,
-                               size_t* size);
-  common::Error Validate(int64_t* dims, int64_t num_dims);
+  common::ErrnoError GetTensorShape(TF_Graph* graph,
+                                    TF_Operation* operation,
+                                    TF_DataType* type,
+                                    int64_t** dims,
+                                    int* num_dims,
+                                    size_t* size);
+  common::ErrnoError Validate(int64_t* dims, int64_t num_dims);
 
   TF_Tensor* tensor_;
 };

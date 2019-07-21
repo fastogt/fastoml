@@ -34,18 +34,18 @@ class IEngine {
  public:
   virtual BackendMeta GetBackendMeta() const = 0;
 
-  virtual common::Error SetProperty(const std::string& property, common::Value* value) = 0;
-  virtual common::Error GetProperty(const std::string& property, common::Value** value) = 0;
+  virtual common::ErrnoError SetProperty(const std::string& property, common::Value* value) = 0;
+  virtual common::ErrnoError GetProperty(const std::string& property, common::Value** value) = 0;
 
-  virtual common::Error MakeFrame(const common::draw::Size& size,
-                                  ImageFormat::Type format,
-                                  void* data,
-                                  IFrame** frame) = 0;
+  virtual common::ErrnoError MakeFrame(const common::draw::Size& size,
+                                       ImageFormat::Type format,
+                                       void* data,
+                                       IFrame** frame) = 0;
 
-  virtual common::Error SetModel(IModel* in_model) = 0;
-  virtual common::Error Start() = 0;
-  virtual common::Error Stop() = 0;
-  virtual common::Error Predict(IFrame* in_frame, IPrediction** pred) = 0;
+  virtual common::ErrnoError SetModel(IModel* in_model) = 0;
+  virtual common::ErrnoError Start() = 0;
+  virtual common::ErrnoError Stop() = 0;
+  virtual common::ErrnoError Predict(IFrame* in_frame, IPrediction** pred) = 0;
   virtual ~IEngine();
 };
 

@@ -37,9 +37,9 @@ BackendMeta Engine::GetBackendMeta() const {
   return meta;
 }
 
-common::Error Engine::SetProperty(const std::string& property, common::Value* value) {
+common::ErrnoError Engine::SetProperty(const std::string& property, common::Value* value) {
   if (property.empty() || !value) {
-    return common::make_error_inval();
+    return common::make_errno_error_inval();
   }
 
   for (size_t i = 0; i < kParameters.size(); ++i) {
@@ -47,40 +47,40 @@ common::Error Engine::SetProperty(const std::string& property, common::Value* va
     if (common::EqualsASCII(prop.name, property, false)) {
       if (prop.type == value->GetType()) {
         if (prop.name == VERSION_PROPERTY) {
-          return common::make_error("Property is not writeable");
+          return common::make_errno_error("Property is not writeable", EINVAL);
         } else if (prop.name == INPUT_LAYER_PROPERTY) {
           common::Value::string_t data;
           if (value->GetAsString(&data)) {
             Model* model = static_cast<Model*>(model_);
             if (!model) {
-              return common::make_error_inval();
+              return common::make_errno_error_inval();
             }
             model->SetInputLayerName(data.as_string());
-            return common::Error();
+            return common::ErrnoError();
           }
         } else if (prop.name == OUTPUT_LAYER_PROPERTY) {
           common::Value::string_t data;
           if (value->GetAsString(&data)) {
             Model* model = static_cast<Model*>(model_);
             if (!model) {
-              return common::make_error_inval();
+              return common::make_errno_error_inval();
             }
             model->SetOutputLayerName(data.as_string());
-            return common::Error();
+            return common::ErrnoError();
           }
         }
       }
 
-      return common::make_error("Invalid value type");
+      return common::make_errno_error("Invalid value type", EINVAL);
     }
   }
 
-  return common::make_error("Propery not found");
+  return common::make_errno_error("Propery not found", EINVAL);
 }
 
-common::Error Engine::GetProperty(const std::string& property, common::Value** value) {
+common::ErrnoError Engine::GetProperty(const std::string& property, common::Value** value) {
   if (property.empty() || !value) {
-    return common::make_error_inval();
+    return common::make_errno_error_inval();
   }
 
   for (size_t i = 0; i < kParameters.size(); ++i) {
@@ -88,73 +88,76 @@ common::Error Engine::GetProperty(const std::string& property, common::Value** v
     if (common::EqualsASCII(prop.name, property, false)) {
       if (prop.name == VERSION_PROPERTY) {
         *value = common::Value::CreateStringValueFromBasicString(TF_Version());
-        return common::Error();
+        return common::ErrnoError();
       } else if (prop.name == INPUT_LAYER_PROPERTY) {
         Model* model = static_cast<Model*>(model_);
         if (!model) {
-          return common::make_error_inval();
+          return common::make_errno_error_inval();
         }
         *value = common::Value::CreateStringValueFromBasicString(model->GetInputLayerName());
-        return common::Error();
+        return common::ErrnoError();
       } else if (prop.name == OUTPUT_LAYER_PROPERTY) {
         Model* model = static_cast<Model*>(model_);
         if (!model) {
-          return common::make_error_inval();
+          return common::make_errno_error_inval();
         }
         *value = common::Value::CreateStringValueFromBasicString(model->GetOutputLayerName());
-        return common::Error();
+        return common::ErrnoError();
       }
       DNOTREACHED();
       break;
     }
   }
 
-  return common::make_error("Propery not found");
+  return common::make_errno_error("Propery not found", EINVAL);
 }
 
-common::Error Engine::MakeFrame(const common::draw::Size& size, ImageFormat::Type format, void* data, IFrame** frame) {
+common::ErrnoError Engine::MakeFrame(const common::draw::Size& size,
+                                     ImageFormat::Type format,
+                                     void* data,
+                                     IFrame** frame) {
   if (!frame) {
-    return common::make_error_inval();
+    return common::make_errno_error_inval();
   }
 
   *frame = new Frame(size, format, data);
-  return common::Error();
+  return common::ErrnoError();
 }
 
-common::Error Engine::SetModel(IModel* in_model) {
+common::ErrnoError Engine::SetModel(IModel* in_model) {
   if (!in_model) {
-    return common::make_error("Received null model");
+    return common::make_errno_error("Received null model", EINVAL);
   }
 
   if (state_ != State::STOPPED) {
-    return common::make_error("Stop model before setting a new state");
+    return common::make_errno_error("Stop model before setting a new state", EINVAL);
   }
 
   if (model_) {
-    return common::make_error("Changing models not supported");
+    return common::make_errno_error("Changing models not supported", EINVAL);
   }
 
   model_ = in_model;
-  return common::Error();
+  return common::ErrnoError();
 }
 
-common::Error Engine::Start() {
+common::ErrnoError Engine::Start() {
   if (state_ == State::STARTED) {
-    return common::make_error("Engine already started");
+    return common::make_errno_error("Engine already started", EINVAL);
   }
 
   if (!model_) {
-    return common::make_error("Model not set yet");
+    return common::make_errno_error("Model not set yet", EINVAL);
   }
 
   tf_status_locker_t pstatus(TF_NewStatus(), TF_DeleteStatus);
   if (!pstatus) {
-    return common::make_error("Cannot allocate status");
+    return common::make_errno_error("Cannot allocate status", ENOMEM);
   }
 
   tf_sessionoptions_locker_t popt(TF_NewSessionOptions(), TF_DeleteSessionOptions);
   if (!popt) {
-    return common::make_error("Cannot allocate session opt");
+    return common::make_errno_error("Cannot allocate session opt", ENOMEM);
   }
 
   Model* model = static_cast<Model*>(model_);
@@ -164,22 +167,22 @@ common::Error Engine::Start() {
 
   TF_Session* session = TF_NewSession(graph, opt, status);
   if (TF_GetCode(status) != TF_OK) {
-    return common::make_error(TF_Message(status));
+    return common::make_errno_error(TF_Message(status), EINTR);
   }
 
-  common::Error err = model_->Start();
+  common::ErrnoError err = model_->Start();
   if (err) {
     return err;
   }
 
   session_ = session;
   state_ = State::STARTED;
-  return common::Error();
+  return common::ErrnoError();
 }
 
-common::Error Engine::Stop() {
+common::ErrnoError Engine::Stop() {
   if (state_ == State::STOPPED) {
-    return common::make_error("Engine already stopped");
+    return common::make_errno_error("Engine already stopped", EINVAL);
   }
 
   if (session_) {
@@ -188,27 +191,27 @@ common::Error Engine::Stop() {
       TF_Status* status = pstatus.get();
       TF_CloseSession(session_, status);
       if (TF_OK != TF_GetCode(status)) {
-        return common::make_error(TF_Message(status));
+        return common::make_errno_error(TF_Message(status), EINVAL);
       }
       TF_DeleteSession(session_, status);
       if (TF_OK != TF_GetCode(status)) {
-        return common::make_error(TF_Message(status));
+        return common::make_errno_error(TF_Message(status), EINVAL);
       }
     }
     session_ = nullptr;
   }
 
   state_ = State::STOPPED;
-  return common::Error();
+  return common::ErrnoError();
 }
 
-common::Error Engine::Predict(IFrame* in_frame, IPrediction** pred) {
+common::ErrnoError Engine::Predict(IFrame* in_frame, IPrediction** pred) {
   if (!in_frame || !pred) {
-    return common::make_error_inval();
+    return common::make_errno_error_inval();
   }
 
   if (state_ != State::STARTED) {
-    return common::make_error("Engine not started");
+    return common::make_errno_error("Engine not started", EINVAL);
   }
 
   Model* model = static_cast<Model*>(model_);
@@ -219,14 +222,14 @@ common::Error Engine::Predict(IFrame* in_frame, IPrediction** pred) {
   Frame* frame = static_cast<Frame*>(in_frame);
 
   TF_Tensor* in_tensor = nullptr;
-  common::Error err = frame->GetOrCreateTensor(graph, in_operation, &in_tensor);
+  common::ErrnoError err = frame->GetOrCreateTensor(graph, in_operation, &in_tensor);
   if (err) {
     return err;
   }
 
   tf_status_locker_t pstatus(TF_NewStatus(), TF_DeleteStatus);
   if (!pstatus) {
-    return common::make_error("Cannot allocate status");
+    return common::make_errno_error("Cannot allocate status", ENOMEM);
   }
 
   Prediction* lpred = new Prediction;
@@ -243,12 +246,12 @@ common::Error Engine::Predict(IFrame* in_frame, IPrediction** pred) {
                 nullptr,                      /* RunMetadata */
                 status);
   if (TF_GetCode(status) != TF_OK) {
-    return common::make_error(TF_Message(status));
+    return common::make_errno_error(TF_Message(status), EINTR);
   }
 
   lpred->SetTensor(graph, out_operation, out_tensor);
   *pred = lpred;
-  return common::Error();
+  return common::ErrnoError();
 }
 
 Engine::~Engine() {}
