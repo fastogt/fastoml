@@ -45,7 +45,7 @@ common::ErrnoError Backend::GetMeta(SupportedBackends code, const BackendMeta** 
   return common::make_errno_error_inval();
 }
 
-Backend::Backend() : engine_(nullptr), model_(nullptr) {}
+Backend::Backend() : engine_(nullptr), model_(nullptr), state_(STOPPED) {}
 
 BackendMeta Backend::GetMeta() const {
   return engine_->GetBackendMeta();
@@ -67,19 +67,47 @@ common::ErrnoError Backend::MakeFrame(const common::draw::Size& size,
 }
 
 common::ErrnoError Backend::LoadGraph(const common::file_system::ascii_file_string_path& path) {
+  if (state_ == STARTED) {
+    return common::ErrnoError();
+  }
+
   return model_->Load(path);
 }
 
 common::ErrnoError Backend::Start() {
-  return engine_->Start();
+  if (state_ == State::STARTED) {
+    return common::ErrnoError();
+  }
+
+  common::ErrnoError err = engine_->Start();
+  if (err) {
+    return err;
+  }
+
+  state_ = State::STARTED;
+  return common::ErrnoError();
 }
 
 common::ErrnoError Backend::Predict(IFrame* in_frame, IPrediction** pred) {
+  if (state_ == State::STARTED) {
+    return common::make_errno_error("Backend not started", EINTR);
+  }
+
   return engine_->Predict(in_frame, pred);
 }
 
 common::ErrnoError Backend::Stop() {
-  return engine_->Stop();
+  if (state_ == State::STOPPED) {
+    return common::ErrnoError();
+  }
+
+  common::ErrnoError err = engine_->Stop();
+  if (err) {
+    return err;
+  }
+
+  state_ = State::STOPPED;
+  return common::ErrnoError();
 }
 
 common::ErrnoError Backend::MakeBackEnd(SupportedBackends code, Backend** backend) {

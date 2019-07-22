@@ -18,6 +18,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <common/error.h>
 #include <common/file_system/path.h>
 #include <common/value.h>
@@ -34,6 +37,8 @@ class IModel;
 
 class Backend final {
  public:
+  enum State { STARTED, STOPPED };
+
   static common::ErrnoError MakeBackEnd(SupportedBackends code, Backend** backend);
   static common::ErrnoError GetParameters(SupportedBackends code, const std::vector<ParameterMeta>** params);
   static common::ErrnoError GetMeta(SupportedBackends code, const BackendMeta** meta);
@@ -59,6 +64,7 @@ class Backend final {
  private:
   IEngine* engine_;
   IModel* model_;
+  State state_;
 
   DISALLOW_COPY_AND_ASSIGN(Backend);
 };

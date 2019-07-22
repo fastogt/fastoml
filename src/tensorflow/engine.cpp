@@ -29,7 +29,30 @@
 namespace fastoml {
 namespace tensorflow {
 
-Engine::Engine() : state_(STOPPED), session_(nullptr), model_(nullptr) {}
+namespace {
+common::ErrnoError FreeSession(TF_Session* session) {
+  if (!session) {
+    return common::make_errno_error_inval();
+  }
+
+  tf_status_locker_t pstatus(TF_NewStatus(), TF_DeleteStatus);
+  if (pstatus) {
+    TF_Status* status = pstatus.get();
+    TF_CloseSession(session, status);
+    if (TF_OK != TF_GetCode(status)) {
+      return common::make_errno_error(TF_Message(status), EINVAL);
+    }
+    TF_DeleteSession(session, status);
+    if (TF_OK != TF_GetCode(status)) {
+      return common::make_errno_error(TF_Message(status), EINVAL);
+    }
+  }
+
+  return common::ErrnoError();
+}
+}  // namespace
+
+Engine::Engine() : session_(nullptr) {}
 
 const BackendMeta Engine::meta = {TENSORFLOW, "Tensorflow", "Google's TensorFlow", TF_Version()};
 
@@ -124,32 +147,7 @@ common::ErrnoError Engine::MakeFrame(const common::draw::Size& size,
   return common::ErrnoError();
 }
 
-common::ErrnoError Engine::SetModel(IModel* in_model) {
-  if (!in_model) {
-    return common::make_errno_error("Received null model", EINVAL);
-  }
-
-  if (state_ != State::STOPPED) {
-    return common::make_errno_error("Stop model before setting a new state", EINVAL);
-  }
-
-  if (model_) {
-    return common::make_errno_error("Changing models not supported", EINVAL);
-  }
-
-  model_ = in_model;
-  return common::ErrnoError();
-}
-
-common::ErrnoError Engine::Start() {
-  if (state_ == State::STARTED) {
-    return common::make_errno_error("Engine already started", EINVAL);
-  }
-
-  if (!model_) {
-    return common::make_errno_error("Model not set yet", EINVAL);
-  }
-
+common::ErrnoError Engine::StartImpl() {
   tf_status_locker_t pstatus(TF_NewStatus(), TF_DeleteStatus);
   if (!pstatus) {
     return common::make_errno_error("Cannot allocate status", ENOMEM);
@@ -172,48 +170,27 @@ common::ErrnoError Engine::Start() {
 
   common::ErrnoError err = model_->Start();
   if (err) {
+    FreeSession(session);
     return err;
   }
 
   session_ = session;
-  state_ = State::STARTED;
   return common::ErrnoError();
 }
 
-common::ErrnoError Engine::Stop() {
-  if (state_ == State::STOPPED) {
-    return common::make_errno_error("Engine already stopped", EINVAL);
-  }
-
+common::ErrnoError Engine::StopImpl() {
   if (session_) {
-    tf_status_locker_t pstatus(TF_NewStatus(), TF_DeleteStatus);
-    if (pstatus) {
-      TF_Status* status = pstatus.get();
-      TF_CloseSession(session_, status);
-      if (TF_OK != TF_GetCode(status)) {
-        return common::make_errno_error(TF_Message(status), EINVAL);
-      }
-      TF_DeleteSession(session_, status);
-      if (TF_OK != TF_GetCode(status)) {
-        return common::make_errno_error(TF_Message(status), EINVAL);
-      }
+    common::ErrnoError err = FreeSession(session_);
+    if (err) {
+      return err;
     }
     session_ = nullptr;
   }
 
-  state_ = State::STOPPED;
   return common::ErrnoError();
 }
 
-common::ErrnoError Engine::Predict(IFrame* in_frame, IPrediction** pred) {
-  if (!in_frame || !pred) {
-    return common::make_errno_error_inval();
-  }
-
-  if (state_ != State::STARTED) {
-    return common::make_errno_error("Engine not started", EINVAL);
-  }
-
+common::ErrnoError Engine::PredictImpl(IFrame* in_frame, IPrediction** pred) {
   Model* model = static_cast<Model*>(model_);
   /* These pointers are validated during load */
   TF_Graph* graph = model->GetGraph();

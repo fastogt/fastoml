@@ -20,6 +20,49 @@
 
 namespace fastoml {
 
+IEngine::IEngine() : model_(nullptr) {}
+
+common::ErrnoError IEngine::SetModel(IModel* in_model) {
+  if (!in_model) {
+    return common::make_errno_error("Received null model", EINVAL);
+  }
+
+  if (model_) {
+    return common::make_errno_error("Changing models not supported", EINVAL);
+  }
+
+  model_ = in_model;
+  return common::ErrnoError();
+}
+
+common::ErrnoError IEngine::Start() {
+  if (!model_) {
+    return common::make_errno_error("Model not set yet", EINVAL);
+  }
+
+  return StartImpl();
+}
+
+common::ErrnoError IEngine::Stop() {
+  if (!model_) {
+    return common::make_errno_error("Model not set yet", EINVAL);
+  }
+
+  return StopImpl();
+}
+
+common::ErrnoError IEngine::Predict(IFrame* in_frame, IPrediction** pred) {
+  if (!in_frame || !pred) {
+    return common::make_errno_error_inval();
+  }
+
+  if (!model_) {
+    return common::make_errno_error("Model not set yet", EINVAL);
+  }
+
+  return PredictImpl(in_frame, pred);
+}
+
 IEngine::~IEngine() {}
 
 }  // namespace fastoml

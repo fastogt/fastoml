@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <common/draw/types.h>
 #include <common/error.h>
 #include <common/value.h>
@@ -42,11 +44,21 @@ class IEngine {
                                        void* data,
                                        IFrame** frame) = 0;
 
-  virtual common::ErrnoError SetModel(IModel* in_model) = 0;
-  virtual common::ErrnoError Start() = 0;
-  virtual common::ErrnoError Stop() = 0;
-  virtual common::ErrnoError Predict(IFrame* in_frame, IPrediction** pred) = 0;
+  common::ErrnoError SetModel(IModel* in_model) WARN_UNUSED_RESULT;
+  common::ErrnoError Start() WARN_UNUSED_RESULT;
+  common::ErrnoError Stop() WARN_UNUSED_RESULT;
+  common::ErrnoError Predict(IFrame* in_frame, IPrediction** pred) WARN_UNUSED_RESULT;
+
   virtual ~IEngine();
+
+ protected:
+  virtual common::ErrnoError StartImpl() = 0;
+  virtual common::ErrnoError StopImpl() = 0;
+  virtual common::ErrnoError PredictImpl(IFrame* in_frame, IPrediction** pred) = 0;
+
+  IEngine();
+
+  IModel* model_;
 };
 
 }  // namespace fastoml

@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include <tensorflow/c/c_api.h>
+#include <string>
 
-#include <common/error.h>
+#include <tensorflow/c/c_api.h>
 
 #include <fastoml/iengine.h>
 
@@ -32,29 +32,25 @@ class Engine : public IEngine {
   Engine();
   static const BackendMeta meta;
 
-  virtual BackendMeta GetBackendMeta() const override;
+  BackendMeta GetBackendMeta() const override;
 
-  virtual common::ErrnoError SetProperty(const std::string& property, common::Value* value) override;
-  virtual common::ErrnoError GetProperty(const std::string& property, common::Value** value) override;
+  common::ErrnoError SetProperty(const std::string& property, common::Value* value) override;
+  common::ErrnoError GetProperty(const std::string& property, common::Value** value) override;
 
-  virtual common::ErrnoError MakeFrame(const common::draw::Size& size,
-                                       ImageFormat::Type format,
-                                       void* data,
-                                       IFrame** frame) override;
+  common::ErrnoError MakeFrame(const common::draw::Size& size,
+                               ImageFormat::Type format,
+                               void* data,
+                               IFrame** frame) override;
 
-  virtual common::ErrnoError SetModel(IModel* in_model) override;
-  virtual common::ErrnoError Start() override;
-  virtual common::ErrnoError Stop() override;
-  virtual common::ErrnoError Predict(IFrame* in_frame, IPrediction** pred) override;
+  ~Engine() override;
 
-  virtual ~Engine() override;
+ protected:
+  common::ErrnoError StartImpl() override;
+  common::ErrnoError StopImpl() override;
+  common::ErrnoError PredictImpl(IFrame* in_frame, IPrediction** pred) override;
 
  private:
-  enum State { STARTED, STOPPED };
-  State state_;
-
   TF_Session* session_;
-  IModel* model_;
 };
 
 }  // namespace tensorflow
