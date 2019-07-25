@@ -89,7 +89,7 @@ common::ErrnoError Backend::Start() {
 }
 
 common::ErrnoError Backend::Predict(IFrame* in_frame, IPrediction** pred) {
-  if (state_ == State::STARTED) {
+  if (state_ != State::STARTED) {
     return common::make_errno_error("Backend not started", EINTR);
   }
 

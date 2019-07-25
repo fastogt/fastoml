@@ -39,7 +39,7 @@ size_t GetTopPrediction(fastoml::IPrediction* prediction) {
 
   for (size_t i = 0; i < num_labels; ++i) {
     float current = 0;
-    common::Error err = prediction->At(i, &current);
+    common::ErrnoError err = prediction->At(i, &current);
     if (err) {
       break;
     }
@@ -93,7 +93,7 @@ std::unique_ptr<float[]> LoadImage(const std::string& path, int reqwidth, int re
 
 TEST(Tensor, Create) {
   fastoml::Backend* back = nullptr;
-  common::Error err = fastoml::Backend::MakeBackEnd(fastoml::TENSORFLOW, &back);
+  common::ErrnoError err = fastoml::Backend::MakeBackEnd(fastoml::TENSORFLOW, &back);
   ASSERT_FALSE(err);
   ASSERT_TRUE(back);
 
