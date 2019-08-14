@@ -25,6 +25,7 @@
 namespace fastoml {
 
 common::ErrnoError Backend::GetParameters(SupportedBackends code, const std::vector<ParameterMeta>** params) {
+  UNUSED(code);
   if (!params) {
     return common::make_errno_error_inval();
   }
@@ -111,6 +112,7 @@ common::ErrnoError Backend::Stop() {
 }
 
 common::ErrnoError Backend::MakeBackEnd(SupportedBackends code, Backend** backend) {
+  UNUSED(code);
   if (!backend) {
     return common::make_errno_error_inval();
   }
