@@ -18,20 +18,15 @@
 
 #pragma once
 
+#include <vector>
+
+#include <fastoml/parameter_meta.h>
+
+#define VERSION_PROPERTY "version"
+
 namespace fastoml {
+namespace ncsdk {
 
-class ImageFormat {
- public:
-  enum Type { RGB, BGR, GRAY };
-
-  explicit ImageFormat(Type type);
-  Type GetType() const;
-  int GetNumPlanes() const;
-
- private:
-  Type type_;
-};
-
-enum SupportedBackends { TENSORFLOW = 0, NCSDK = 1 };
-
+extern const std::vector<ParameterMeta> kParameters;
+}
 }  // namespace fastoml

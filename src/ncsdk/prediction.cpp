@@ -16,22 +16,28 @@
     along with FastoML. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include <fastoml/ncsdk/prediction.h>
+
+#include <fastoml/ncsdk/types.h>
 
 namespace fastoml {
+namespace ncsdk {
 
-class ImageFormat {
- public:
-  enum Type { RGB, BGR, GRAY };
+Prediction::Prediction() : result_size_(0) {}
 
-  explicit ImageFormat(Type type);
-  Type GetType() const;
-  int GetNumPlanes() const;
+common::ErrnoError Prediction::At(size_t index, float* val) {
+  return common::ErrnoError();
+}
 
- private:
-  Type type_;
-};
+void* Prediction::GetResultData() {
+  return nullptr;
+}
 
-enum SupportedBackends { TENSORFLOW = 0, NCSDK = 1 };
+size_t Prediction::GetResultSize() const {
+  return result_size_;
+}
 
+Prediction::~Prediction() {}
+
+}  // namespace ncsdk
 }  // namespace fastoml

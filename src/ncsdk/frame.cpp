@@ -16,22 +16,16 @@
     along with FastoML. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include <fastoml/ncsdk/frame.h>
+
+#include <fastoml/ncsdk/types.h>
 
 namespace fastoml {
+namespace ncsdk {
 
-class ImageFormat {
- public:
-  enum Type { RGB, BGR, GRAY };
+Frame::Frame(const common::draw::Size& size, ImageFormat::Type format, data_t data) : base_class(size, format, data) {}
 
-  explicit ImageFormat(Type type);
-  Type GetType() const;
-  int GetNumPlanes() const;
+Frame::~Frame() {}
 
- private:
-  Type type_;
-};
-
-enum SupportedBackends { TENSORFLOW = 0, NCSDK = 1 };
-
+}  // namespace ncsdk
 }  // namespace fastoml

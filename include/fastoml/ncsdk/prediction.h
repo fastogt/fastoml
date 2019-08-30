@@ -18,20 +18,24 @@
 
 #pragma once
 
+#include <fastoml/iprediction.h>
+
 namespace fastoml {
+namespace ncsdk {
 
-class ImageFormat {
+class Prediction : public IPrediction {
  public:
-  enum Type { RGB, BGR, GRAY };
+  Prediction();
 
-  explicit ImageFormat(Type type);
-  Type GetType() const;
-  int GetNumPlanes() const;
+  common::ErrnoError At(size_t index, float* val) override;
+  void* GetResultData() override;
+  size_t GetResultSize() const override;
+
+  ~Prediction() override;
 
  private:
-  Type type_;
+  size_t result_size_;
 };
 
-enum SupportedBackends { TENSORFLOW = 0, NCSDK = 1 };
-
+}  // namespace ncsdk
 }  // namespace fastoml

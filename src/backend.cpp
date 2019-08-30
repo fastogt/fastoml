@@ -41,6 +41,8 @@ common::ErrnoError Backend::GetMeta(SupportedBackends code, const BackendMeta** 
 
   if (code == TENSORFLOW) {
     *meta = &tensorflow::Engine::meta;
+  } else if (code == NCSDK) {
+    *meta = &tensorflow::Engine::meta;
   }
 
   return common::make_errno_error_inval();

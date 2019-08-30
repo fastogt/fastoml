@@ -18,20 +18,21 @@
 
 #pragma once
 
+#include <tensorflow/c/c_api.h>
+
+#include <fastoml/imodel.h>
+
 namespace fastoml {
+namespace ncsdk {
 
-class ImageFormat {
+class Model : public IModel {
  public:
-  enum Type { RGB, BGR, GRAY };
+  Model();
 
-  explicit ImageFormat(Type type);
-  Type GetType() const;
-  int GetNumPlanes() const;
-
- private:
-  Type type_;
+  common::ErrnoError Load(const common::file_system::ascii_file_string_path& path) override WARN_UNUSED_RESULT;
+  common::ErrnoError Start() override WARN_UNUSED_RESULT;
+  ~Model() override;
 };
 
-enum SupportedBackends { TENSORFLOW = 0, NCSDK = 1 };
-
+}  // namespace ncsdk
 }  // namespace fastoml

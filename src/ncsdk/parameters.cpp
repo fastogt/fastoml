@@ -16,22 +16,13 @@
     along with FastoML. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include <fastoml/ncsdk/parameters.h>
 
 namespace fastoml {
+namespace ncsdk {
 
-class ImageFormat {
- public:
-  enum Type { RGB, BGR, GRAY };
+const std::vector<ParameterMeta> kParameters = {
+    {VERSION_PROPERTY, "Tensorflow version", ParameterMeta::Flags::READ, common::Value::TYPE_STRING}};
 
-  explicit ImageFormat(Type type);
-  Type GetType() const;
-  int GetNumPlanes() const;
-
- private:
-  Type type_;
-};
-
-enum SupportedBackends { TENSORFLOW = 0, NCSDK = 1 };
-
+}  // namespace ncsdk
 }  // namespace fastoml

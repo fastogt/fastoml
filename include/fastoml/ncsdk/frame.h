@@ -18,20 +18,20 @@
 
 #pragma once
 
+#include <fastoml/iframe.h>
+
+#include <tensorflow/c/c_api.h>
+
 namespace fastoml {
+namespace ncsdk {
 
-class ImageFormat {
+class Frame : public IFrame {
  public:
-  enum Type { RGB, BGR, GRAY };
+  typedef IFrame base_class;
+  Frame(const common::draw::Size& size, ImageFormat::Type format, data_t data);
 
-  explicit ImageFormat(Type type);
-  Type GetType() const;
-  int GetNumPlanes() const;
-
- private:
-  Type type_;
+  ~Frame() override;
 };
 
-enum SupportedBackends { TENSORFLOW = 0, NCSDK = 1 };
-
+}  // namespace ncsdk
 }  // namespace fastoml

@@ -1,5 +1,6 @@
 FIND_PACKAGE(Common REQUIRED)
-FIND_PACKAGE(TensorFlow REQUIRED)
+FIND_PACKAGE(TensorFlow)
+FIND_PACKAGE(CUDA)
 
 SET(ML_CONFIG_GEN_PATH ${CMAKE_SOURCE_DIR}/include/fastoml/config.h)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/src/config.h.in ${ML_CONFIG_GEN_PATH} @ONLY IMMEDIATE)
@@ -26,22 +27,43 @@ SET(ML_SOURCES
   ${CMAKE_SOURCE_DIR}/src/backend.cpp
 )
 
-SET(ML_TENSORFLOW_HEADERS
-  ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/types.h
-  ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/parameters.h
-  ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/frame.h
-  ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/model.h
-  ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/engine.h
-  ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/prediction.h
-)
-SET(ML_TENSORFLOW_SOURCES
-  ${CMAKE_SOURCE_DIR}/src/tensorflow/types.cpp
-  ${CMAKE_SOURCE_DIR}/src/tensorflow/parameters.cpp
-  ${CMAKE_SOURCE_DIR}/src/tensorflow/frame.cpp
-  ${CMAKE_SOURCE_DIR}/src/tensorflow/model.cpp
-  ${CMAKE_SOURCE_DIR}/src/tensorflow/engine.cpp
-  ${CMAKE_SOURCE_DIR}/src/tensorflow/prediction.cpp
-)
+IF(TENSORFLOW_FOUND)
+  SET(ML_TENSORFLOW_HEADERS
+    ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/types.h
+    ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/parameters.h
+    ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/frame.h
+    ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/model.h
+    ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/engine.h
+    ${CMAKE_SOURCE_DIR}/include/fastoml/tensorflow/prediction.h
+  )
+  SET(ML_TENSORFLOW_SOURCES
+    ${CMAKE_SOURCE_DIR}/src/tensorflow/types.cpp
+    ${CMAKE_SOURCE_DIR}/src/tensorflow/parameters.cpp
+    ${CMAKE_SOURCE_DIR}/src/tensorflow/frame.cpp
+    ${CMAKE_SOURCE_DIR}/src/tensorflow/model.cpp
+    ${CMAKE_SOURCE_DIR}/src/tensorflow/engine.cpp
+    ${CMAKE_SOURCE_DIR}/src/tensorflow/prediction.cpp
+  )
+ENDIF(TENSORFLOW_FOUND)
+
+IF(CUDA_FOUND)
+  SET(ML_NCSDK_HEADERS
+    ${CMAKE_SOURCE_DIR}/include/fastoml/ncsdk/types.h
+    ${CMAKE_SOURCE_DIR}/include/fastoml/ncsdk/parameters.h
+    ${CMAKE_SOURCE_DIR}/include/fastoml/ncsdk/frame.h
+    ${CMAKE_SOURCE_DIR}/include/fastoml/ncsdk/model.h
+    ${CMAKE_SOURCE_DIR}/include/fastoml/ncsdk/engine.h
+    ${CMAKE_SOURCE_DIR}/include/fastoml/ncsdk/prediction.h
+  )
+  SET(ML_NCSDK_SOURCES
+    ${CMAKE_SOURCE_DIR}/src/ncsdk/types.cpp
+    ${CMAKE_SOURCE_DIR}/src/ncsdk/parameters.cpp
+    ${CMAKE_SOURCE_DIR}/src/ncsdk/frame.cpp
+    ${CMAKE_SOURCE_DIR}/src/ncsdk/model.cpp
+    ${CMAKE_SOURCE_DIR}/src/ncsdk/engine.cpp
+    ${CMAKE_SOURCE_DIR}/src/ncsdk/prediction.cpp
+  )
+ENDIF(CUDA_FOUND)
 
 IF(OS_WINDOWS)
   SET(PLATFORM_HDRS ${PLATFORM_HDRS})
@@ -61,8 +83,8 @@ ELSEIF(OS_FREEBSD)
   SET(PLATFORM_LIBRARIES ${PLATFORM_LIBRARIES})
 ENDIF(OS_WINDOWS)
 
-SET(ML_HEADERS ${ML_HEADERS} ${ML_TENSORFLOW_HEADERS})
-SET(ML_SOURCES ${ML_SOURCES} ${ML_TENSORFLOW_SOURCES})
+SET(ML_HEADERS ${ML_HEADERS} ${ML_TENSORFLOW_HEADERS} ${ML_NCSDK_HEADERS})
+SET(ML_SOURCES ${ML_SOURCES} ${ML_TENSORFLOW_SOURCES} ${ML_NCSDK_SOURCES})
 
 SET(ML_LIBRARY ${PROJECT_NAME_LOWERCASE})
 SET(ML_INCLUDE_DIRECTORIES ${TENSORFLOW_INCLUDE_DIRS})
