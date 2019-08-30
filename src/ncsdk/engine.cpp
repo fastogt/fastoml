@@ -31,7 +31,7 @@ namespace ncsdk {
 
 Engine::Engine() {}
 
-const BackendMeta Engine::meta = {NCSDK, "NCSDK", "NVidia", "1"};
+const BackendMeta Engine::meta = {NCSDK, "NCSDK", "Intel Movidius Neural Compute software developer kit", "2"};
 
 BackendMeta Engine::GetBackendMeta() const {
   return meta;
