@@ -18,9 +18,13 @@
 
 #include <fastoml/backend.h>
 
-#include <fastoml/tensorflow/engine.h>
+#include <fastoml/iengine.h>
+#include <fastoml/imodel.h>
+
+#if defined(HAVE_TENSORFLOW)
 #include <fastoml/tensorflow/model.h>
 #include <fastoml/tensorflow/parameters.h>
+#endif
 
 namespace fastoml {
 
@@ -30,7 +34,19 @@ common::ErrnoError Backend::GetParameters(SupportedBackends code, const std::vec
     return common::make_errno_error_inval();
   }
 
-  *params = &tensorflow::kParameters;
+  if (code == TENSORFLOW) {
+#if defined(HAVE_TENSORFLOW)
+    *params = &tensorflow::kParameters;
+#else
+    return common::make_errno_error_inval();
+#endif
+  } else if (code == NCSDK) {
+#if defined(HAVE_NCSDK)
+    *meta = &ncsdk::kParameters;
+#else
+    return common::make_errno_error_inval();
+#endif
+  }
   return common::ErrnoError();
 }
 
@@ -40,12 +56,20 @@ common::ErrnoError Backend::GetMeta(SupportedBackends code, const BackendMeta** 
   }
 
   if (code == TENSORFLOW) {
+#if defined(HAVE_TENSORFLOW)
     *meta = &tensorflow::Engine::meta;
+#else
+    return common::make_errno_error_inval();
+#endif
   } else if (code == NCSDK) {
-    *meta = &tensorflow::Engine::meta;
+#if defined(HAVE_NCSDK)
+    *meta = &ncsdk::Engine::meta;
+#else
+    return common::make_errno_error_inval();
+#endif
   }
 
-  return common::make_errno_error_inval();
+  return common::ErrnoError();
 }
 
 Backend::Backend() : engine_(nullptr), model_(nullptr), state_(STOPPED) {}
@@ -119,8 +143,24 @@ common::ErrnoError Backend::MakeBackEnd(SupportedBackends code, Backend** backen
     return common::make_errno_error_inval();
   }
 
-  fastoml::IModel* model = new fastoml::tensorflow::Model;
-  fastoml::IEngine* engine = new fastoml::tensorflow::Engine;
+  fastoml::IModel* model = nullptr;
+  fastoml::IEngine* engine = nullptr;
+  if (code == TENSORFLOW) {
+#if defined(HAVE_TENSORFLOW)
+    model = new fastoml::tensorflow::Model;
+    engine = new fastoml::tensorflow::Engine;
+#else
+    return common::make_errno_error_inval();
+#endif
+  } else if (code == NCSDK){
+#if defined(HAVE_NCSDK)
+    model = new fastoml::ncsdk::Model;
+    engine = new fastoml::ncsdk::Engine;
+#else
+    return common::make_errno_error_inval();
+#endif
+  }
+
   common::ErrnoError err = engine->SetModel(model);
   if (err) {
     return err;
