@@ -67,7 +67,7 @@ common::ErrnoError Engine::GetProperty(const std::string& property, common::Valu
     const ParameterMeta prop = kParameters[i];
     if (common::EqualsASCII(prop.name, property, false)) {
       if (prop.name == VERSION_PROPERTY) {
-        *value = common::Value::CreateStringValueFromBasicString(TF_Version());
+        *value = common::Value::CreateStringValueFromBasicString(meta.version);
         return common::ErrnoError();
       }
     }

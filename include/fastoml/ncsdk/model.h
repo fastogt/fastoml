@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <tensorflow/c/c_api.h>
-
 #include <fastoml/imodel.h>
 
 namespace fastoml {

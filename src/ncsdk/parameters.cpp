@@ -22,7 +22,7 @@ namespace fastoml {
 namespace ncsdk {
 
 const std::vector<ParameterMeta> kParameters = {
-    {VERSION_PROPERTY, "Tensorflow version", ParameterMeta::Flags::READ, common::Value::TYPE_STRING}};
+    {VERSION_PROPERTY, "NCSDK version", ParameterMeta::Flags::READ, common::Value::TYPE_STRING}};
 
 }  // namespace ncsdk
 }  // namespace fastoml

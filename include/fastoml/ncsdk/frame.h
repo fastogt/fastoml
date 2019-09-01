@@ -20,8 +20,6 @@
 
 #include <fastoml/iframe.h>
 
-#include <tensorflow/c/c_api.h>
-
 namespace fastoml {
 namespace ncsdk {
 

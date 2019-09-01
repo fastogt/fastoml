@@ -22,14 +22,20 @@
 #include <fastoml/imodel.h>
 
 #if defined(HAVE_TENSORFLOW)
+#include <fastoml/tensorflow/engine.h>
 #include <fastoml/tensorflow/model.h>
 #include <fastoml/tensorflow/parameters.h>
+#endif
+
+#if defined(HAVE_NCSDK)
+#include <fastoml/ncsdk/engine.h>
+#include <fastoml/ncsdk/model.h>
+#include <fastoml/ncsdk/parameters.h>
 #endif
 
 namespace fastoml {
 
 common::ErrnoError Backend::GetParameters(SupportedBackends code, const std::vector<ParameterMeta>** params) {
-  UNUSED(code);
   if (!params) {
     return common::make_errno_error_inval();
   }
@@ -42,7 +48,7 @@ common::ErrnoError Backend::GetParameters(SupportedBackends code, const std::vec
 #endif
   } else if (code == NCSDK) {
 #if defined(HAVE_NCSDK)
-    *meta = &ncsdk::kParameters;
+    *params = &ncsdk::kParameters;
 #else
     return common::make_errno_error_inval();
 #endif
@@ -138,7 +144,6 @@ common::ErrnoError Backend::Stop() {
 }
 
 common::ErrnoError Backend::MakeBackEnd(SupportedBackends code, Backend** backend) {
-  UNUSED(code);
   if (!backend) {
     return common::make_errno_error_inval();
   }

@@ -20,8 +20,6 @@
 
 #include <string>
 
-#include <tensorflow/c/c_api.h>
-
 #include <fastoml/iengine.h>
 
 namespace fastoml {
