@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <tensorflow/c/c_api.h>
 
 #include <fastoml/imodel.h>
@@ -29,9 +31,10 @@ class Model : public IModel {
  public:
   Model();
 
-  virtual common::ErrnoError Load(const common::file_system::ascii_file_string_path& path) override WARN_UNUSED_RESULT;
-  virtual common::ErrnoError Start() override WARN_UNUSED_RESULT;
-  virtual ~Model() override;
+  common::ErrnoError Load(const common::file_system::ascii_file_string_path& path) override WARN_UNUSED_RESULT;
+  common::ErrnoError Start() override WARN_UNUSED_RESULT;
+  common::ErrnoError Stop() override WARN_UNUSED_RESULT;
+  ~Model() override;
 
   std::string GetInputLayerName() const;
   void SetInputLayerName(const std::string& name);

@@ -23,7 +23,7 @@
 namespace fastoml {
 namespace ncsdk {
 
-std::string GetStringFromStatus (int status) {
+std::string GetStringFromStatus(int status) {
   if (status == NC_OK) {
     return "Everything OK";
   } else if (status == NC_BUSY) {

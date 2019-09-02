@@ -106,6 +106,10 @@ common::ErrnoError Model::Start() {
   return common::ErrnoError();
 }
 
+common::ErrnoError Model::Stop() {
+  return common::ErrnoError();
+}
+
 std::string Model::GetInputLayerName() const {
   return input_layer_name_;
 }

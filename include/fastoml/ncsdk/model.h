@@ -33,16 +33,16 @@ class Model : public IModel {
   common::ErrnoError Start() override WARN_UNUSED_RESULT;
   common::ErrnoError Stop() override WARN_UNUSED_RESULT;
 
-  ncGraphHandle_t *GetHandler() const;
+  ncGraphHandle_t* GetHandler() const;
   void* GetData() const;
   size_t GetDataSize() const;
 
   ~Model() override;
 
-  private:
-    ncGraphHandle_t* graph_;
-    void* graph_data_;
-    size_t graph_size_;
+ private:
+  ncGraphHandle_t* graph_;
+  void* graph_data_;
+  size_t graph_size_;
 };
 
 }  // namespace ncsdk

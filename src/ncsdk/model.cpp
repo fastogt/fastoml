@@ -76,7 +76,7 @@ common::ErrnoError Model::Start() {
   }
 
   ncGraphHandle_t* lgraph = nullptr;
-  ncStatus_t ret = ncGraphCreate (kGraphName, &lgraph);
+  ncStatus_t ret = ncGraphCreate(kGraphName, &lgraph);
   if (ret != NC_OK) {
     return common::make_errno_error(GetStringFromStatus(ret), EINVAL);
   }
@@ -97,7 +97,7 @@ common::ErrnoError Model::Stop() {
   return common::ErrnoError();
 }
 
-ncGraphHandle_t *Model::GetHandler() const {
+ncGraphHandle_t* Model::GetHandler() const {
   return graph_;
 }
 

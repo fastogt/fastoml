@@ -23,7 +23,7 @@
 namespace fastoml {
 namespace ncsdk {
 
-std::string GetStringFromStatus (int status);
+std::string GetStringFromStatus(int status);
 
 }  // namespace ncsdk
 }  // namespace fastoml

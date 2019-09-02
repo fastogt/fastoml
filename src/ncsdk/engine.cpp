@@ -29,7 +29,12 @@
 namespace fastoml {
 namespace ncsdk {
 
-Engine::Engine() : movidius_device_(nullptr), input_buffers_(nullptr), output_buffers_(nullptr), input_descriptor_(), output_descriptor_() {}
+Engine::Engine()
+    : movidius_device_(nullptr),
+      input_buffers_(nullptr),
+      output_buffers_(nullptr),
+      input_descriptor_(),
+      output_descriptor_() {}
 
 const BackendMeta Engine::meta = {NCSDK, "NCSDK", "Intel Movidius Neural Compute software developer kit", "2"};
 
@@ -94,7 +99,7 @@ common::ErrnoError Engine::StartImpl() {
     return err;
   }
 
-  ncDeviceHandle_t *device_handle = nullptr;
+  ncDeviceHandle_t* device_handle = nullptr;
   ncStatus_t ret = ncDeviceCreate(0, &device_handle);
   if (ret != NC_OK) {
     return common::make_errno_error(GetStringFromStatus(ret), EINVAL);
@@ -118,7 +123,7 @@ common::ErrnoError Engine::StartImpl() {
     return common::make_errno_error(GetStringFromStatus(ret), EINVAL);
   }
 
-  unsigned int descriptor_length  = sizeof(struct ncTensorDescriptor_t);
+  unsigned int descriptor_length = sizeof(struct ncTensorDescriptor_t);
   ncTensorDescriptor_t linput_descriptor;
   ret = ncGraphGetOption(model_handle, NC_RO_GRAPH_INPUT_TENSOR_DESCRIPTORS, &linput_descriptor, &descriptor_length);
   if (ret != NC_OK) {
@@ -137,7 +142,7 @@ common::ErrnoError Engine::StartImpl() {
     return common::make_errno_error(GetStringFromStatus(ret), EINVAL);
   }
 
-  ncFifoHandle_t *input_buffers_ptr = nullptr;
+  ncFifoHandle_t* input_buffers_ptr = nullptr;
   ret = ncFifoCreate("FifoIn0", NC_FIFO_HOST_WO, &input_buffers_ptr);
   if (ret != NC_OK) {
     ncGraphDestroy(&model_handle);
@@ -155,7 +160,7 @@ common::ErrnoError Engine::StartImpl() {
     return common::make_errno_error(GetStringFromStatus(ret), EINVAL);
   }
 
-  ncFifoHandle_t *output_buffers_ptr = nullptr;
+  ncFifoHandle_t* output_buffers_ptr = nullptr;
   ret = ncFifoCreate("FifoOut0", NC_FIFO_HOST_RO, &output_buffers_ptr);
   if (ret != NC_OK) {
     ncFifoDestroy(&input_buffers_ptr);
@@ -227,7 +232,7 @@ common::ErrnoError Engine::StopImpl() {
 common::ErrnoError Engine::PredictImpl(IFrame* in_frame, IPrediction** pred) {
   Model* model = static_cast<Model*>(model_);
 
-  float* data = static_cast<float *>(in_frame->GetData());
+  float* data = static_cast<float*>(in_frame->GetData());
   ImageFormat in_format = in_frame->GetFormat();
   common::draw::Size size = in_frame->GetSize();
   unsigned int input_data_size = sizeof(float) * size.width * size.height * in_format.GetNumPlanes();
@@ -243,7 +248,8 @@ common::ErrnoError Engine::PredictImpl(IFrame* in_frame, IPrediction** pred) {
 
   unsigned int output_data_size;
   unsigned int output_data_size_byte_length = sizeof(unsigned int);
-  ret = ncFifoGetOption(output_buffers_, NC_RO_FIFO_ELEMENT_DATA_SIZE, &output_data_size, &output_data_size_byte_length);
+  ret =
+      ncFifoGetOption(output_buffers_, NC_RO_FIFO_ELEMENT_DATA_SIZE, &output_data_size, &output_data_size_byte_length);
   if (ret != NC_OK) {
     return common::make_errno_error(GetStringFromStatus(ret), EINVAL);
   }
@@ -253,7 +259,7 @@ common::ErrnoError Engine::PredictImpl(IFrame* in_frame, IPrediction** pred) {
     return common::make_errno_error("Can't alloc data for inference results", ENOMEM);
   }
 
-  void *user_param = nullptr;
+  void* user_param = nullptr;
   ret = ncFifoReadElem(output_buffers_, presult, &output_data_size, &user_param);
   if (ret != NC_OK) {
     free(presult);

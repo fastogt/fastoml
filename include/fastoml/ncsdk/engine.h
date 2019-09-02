@@ -50,9 +50,9 @@ class Engine : public IEngine {
   common::ErrnoError PredictImpl(IFrame* in_frame, IPrediction** pred) override;
 
  private:
-  ncDeviceHandle_t *movidius_device_;
-  ncFifoHandle_t *input_buffers_;
-  ncFifoHandle_t *output_buffers_;
+  ncDeviceHandle_t* movidius_device_;
+  ncFifoHandle_t* input_buffers_;
+  ncFifoHandle_t* output_buffers_;
   ncTensorDescriptor_t input_descriptor_;
   ncTensorDescriptor_t output_descriptor_;
 };
