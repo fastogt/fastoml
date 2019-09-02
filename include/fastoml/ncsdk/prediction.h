@@ -34,6 +34,7 @@ class Prediction : public IPrediction {
   ~Prediction() override;
 
  private:
+  float* result_data_;
   size_t result_size_;
 };
 

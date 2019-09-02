@@ -26,6 +26,10 @@ namespace tensorflow {
 Prediction::Prediction() : tensor_(nullptr), result_size_(0) {}
 
 common::ErrnoError Prediction::At(size_t index, float* val) {
+  if (!val) {
+    return common::make_errno_error_inval();
+  }
+
   if (!tensor_) {
     return common::make_errno_error("Prediction was not properly initialized", EINVAL);
   }

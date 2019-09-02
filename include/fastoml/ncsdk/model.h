@@ -20,6 +20,8 @@
 
 #include <fastoml/imodel.h>
 
+struct ncGraphHandle_t;
+
 namespace fastoml {
 namespace ncsdk {
 
@@ -29,7 +31,17 @@ class Model : public IModel {
 
   common::ErrnoError Load(const common::file_system::ascii_file_string_path& path) override WARN_UNUSED_RESULT;
   common::ErrnoError Start() override WARN_UNUSED_RESULT;
+
+  void SetName(const std::string& name);
+  std::string GetName() const;
+
   ~Model() override;
+
+  private:
+    ncGraphHandle_t* graph_;
+    void* graph_data_;
+    size_t graph_size_;
+    std::string name_;
 };
 
 }  // namespace ncsdk

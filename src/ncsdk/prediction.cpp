@@ -23,14 +23,33 @@
 namespace fastoml {
 namespace ncsdk {
 
-Prediction::Prediction() : result_size_(0) {}
+Prediction::Prediction() : result_data_(nullptr), result_size_(0) {}
 
 common::ErrnoError Prediction::At(size_t index, float* val) {
+  if (!val) {
+    return common::make_errno_error_inval();
+  }
+
+  if (!result_data_) {
+    return common::make_errno_error("Prediction was not properly initialized", EINVAL);
+  }
+
+  size_t n_results = GetResultSize() / sizeof(float);
+  if (n_results < index) {
+    return common::make_errno_error("Triying to access an non-existing index", EINVAL);
+  }
+
+  float* fdata = static_cast<float*>(GetResultData());
+  if (!fdata) {
+    return common::make_errno_error("Prediction result not set yet", ENOMEM);
+  }
+
+  *val = fdata[index];
   return common::ErrnoError();
 }
 
 void* Prediction::GetResultData() {
-  return nullptr;
+  return result_data_;
 }
 
 size_t Prediction::GetResultSize() const {
