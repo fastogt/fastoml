@@ -18,6 +18,12 @@
 
 #pragma once
 
+#include <string>
+
 namespace fastoml {
-namespace ncsdk {}  // namespace ncsdk
+namespace ncsdk {
+
+std::string GetStringFromStatus (int status);
+
+}  // namespace ncsdk
 }  // namespace fastoml

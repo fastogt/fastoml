@@ -25,7 +25,7 @@ namespace ncsdk {
 
 class Prediction : public IPrediction {
  public:
-  Prediction();
+  Prediction(float* data, size_t size);
 
   common::ErrnoError At(size_t index, float* val) override;
   void* GetResultData() override;

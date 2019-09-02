@@ -23,7 +23,7 @@
 namespace fastoml {
 namespace ncsdk {
 
-Prediction::Prediction() : result_data_(nullptr), result_size_(0) {}
+Prediction::Prediction(float *data, size_t size) : result_data_(data), result_size_(size) {}
 
 common::ErrnoError Prediction::At(size_t index, float* val) {
   if (!val) {
@@ -56,7 +56,13 @@ size_t Prediction::GetResultSize() const {
   return result_size_;
 }
 
-Prediction::~Prediction() {}
+Prediction::~Prediction() {
+  if (result_data_) {
+    free(result_data_);
+    result_data_ = nullptr;
+  }
+  result_size_ = 0;
+}
 
 }  // namespace ncsdk
 }  // namespace fastoml

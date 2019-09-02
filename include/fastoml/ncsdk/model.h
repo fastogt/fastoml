@@ -31,9 +31,11 @@ class Model : public IModel {
 
   common::ErrnoError Load(const common::file_system::ascii_file_string_path& path) override WARN_UNUSED_RESULT;
   common::ErrnoError Start() override WARN_UNUSED_RESULT;
+  common::ErrnoError Stop() override WARN_UNUSED_RESULT;
 
-  void SetName(const std::string& name);
-  std::string GetName() const;
+  ncGraphHandle_t *GetHandler() const;
+  void* GetData() const;
+  size_t GetDataSize() const;
 
   ~Model() override;
 
@@ -41,7 +43,6 @@ class Model : public IModel {
     ncGraphHandle_t* graph_;
     void* graph_data_;
     size_t graph_size_;
-    std::string name_;
 };
 
 }  // namespace ncsdk

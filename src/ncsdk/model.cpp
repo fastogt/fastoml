@@ -20,44 +20,18 @@
 
 #include <mvnc.h>
 
-#include <map>
-
 #include <common/file_system/file.h>
 
+#include <fastoml/ncsdk/types.h>
+
 namespace {
-std::string GetStringFromStatus (ncStatus_t status) {
-  static std::map<int, const std::string> string_descriptions ({
-    {NC_OK, "Everything OK"},
-    {NC_BUSY, "Device is busy, retry later"},
-    {NC_ERROR, "Error communicating with the device"},
-    {NC_OUT_OF_MEMORY, "Out of memory"},
-    {NC_DEVICE_NOT_FOUND, "No device at the given index or name"},
-    {NC_INVALID_PARAMETERS, "At least one of the given parameters is wrong"},
-    {NC_TIMEOUT, "Timeout in the communication with the device"},
-    {NC_MVCMD_NOT_FOUND, "The file to boot Myriad was not found"},
-    {NC_NOT_ALLOCATED, "The graph or device has been closed during the operation"},
-    {NC_UNAUTHORIZED, "Unauthorized operation"},
-    {NC_UNSUPPORTED_GRAPH_FILE, "The graph file version is not supported"},
-    {NC_UNSUPPORTED_CONFIGURATION_FILE, "The configuration file version is not supported"},
-    {NC_UNSUPPORTED_FEATURE, "Not supported by this FW version"},
-    {NC_MYRIAD_ERROR, "An error has been reported by the device, use NC_DEVICE_DEBUG_INFO or NC_GRAPH_DEBUG_INFO"},
-    {NC_INVALID_DATA_LENGTH, "invalid data length has been passed when get/set option"},
-    {NC_INVALID_HANDLE, "handle to object that is invalid"}
-  });
-
-  auto search = string_descriptions.find (status);
-  if (string_descriptions.end () == search) {
-    return "Unable to find enum value, outdated list";
-  }
-
-  return search->second;
-}
+const char kGraphName[] = "NCSDK";
 }
 
 namespace fastoml {
 namespace ncsdk {
 
-Model::Model() : graph_(nullptr), graph_data_(nullptr), graph_size_(0), name_() {}
+Model::Model() : graph_(nullptr), graph_data_(nullptr), graph_size_(0) {}
 
 common::ErrnoError Model::Load(const common::file_system::ascii_file_string_path& path) {
   if (!path.IsValid()) {
@@ -97,17 +71,13 @@ common::ErrnoError Model::Load(const common::file_system::ascii_file_string_path
 }
 
 common::ErrnoError Model::Start() {
-  if (name_.empty()) {
-    return common::make_errno_error("Invalid graph name", EINVAL);
-  }
-
   if (graph_) {
-    return common::make_errno_error("Model already started", EINVAL);
+    return common::ErrnoError();
   }
 
   ncGraphHandle_t* lgraph = nullptr;
-  ncStatus_t ret = ncGraphCreate (name_.c_str(), &lgraph);
-  if (NC_OK != ret) {
+  ncStatus_t ret = ncGraphCreate (kGraphName, &lgraph);
+  if (ret != NC_OK) {
     return common::make_errno_error(GetStringFromStatus(ret), EINVAL);
   }
 
@@ -115,13 +85,31 @@ common::ErrnoError Model::Start() {
   return common::ErrnoError();
 }
 
-Model::~Model() {
+common::ErrnoError Model::Stop() {
   if (graph_) {
     ncStatus_t ret = ncGraphDestroy(&graph_);
-    if (NC_OK != ret) {}
+    if (ret != NC_OK) {
+      return common::make_errno_error(GetStringFromStatus(ret), EINVAL);
+    }
     graph_ = nullptr;
   }
 
+  return common::ErrnoError();
+}
+
+ncGraphHandle_t *Model::GetHandler() const {
+  return graph_;
+}
+
+void* Model::GetData() const {
+  return graph_data_;
+}
+
+size_t Model::GetDataSize() const {
+  return graph_size_;
+}
+
+Model::~Model() {
   if (graph_data_) {
     free(graph_data_);
     graph_data_ = nullptr;
@@ -129,10 +117,6 @@ Model::~Model() {
 
   if (graph_size_) {
     graph_size_ = 0;
-  }
-
-  if(!name_.empty()) {
-    name_.clear();;
   }
 }
 
