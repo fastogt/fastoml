@@ -32,9 +32,7 @@ namespace ncsdk {
 Engine::Engine()
     : movidius_device_(nullptr),
       input_buffers_(nullptr),
-      output_buffers_(nullptr),
-      input_descriptor_(),
-      output_descriptor_() {}
+      output_buffers_(nullptr) {}
 
 const BackendMeta Engine::meta = {NCSDK, "NCSDK", "Intel Movidius Neural Compute software developer kit", "2"};
 
@@ -181,9 +179,7 @@ common::ErrnoError Engine::StartImpl() {
   }
 
   input_buffers_ = input_buffers_ptr;
-  input_descriptor_ = linput_descriptor;
   output_buffers_ = output_buffers_ptr;
-  output_descriptor_ = loutput_descriptor;
   movidius_device_ = device_handle;
   return common::ErrnoError();
 }
@@ -224,8 +220,6 @@ common::ErrnoError Engine::StopImpl() {
     movidius_device_ = nullptr;
   }
 
-  input_descriptor_ = ncTensorDescriptor_t();
-  output_descriptor_ = ncTensorDescriptor_t();
   return common::ErrnoError();
 }
 

@@ -53,8 +53,6 @@ class Engine : public IEngine {
   ncDeviceHandle_t* movidius_device_;
   ncFifoHandle_t* input_buffers_;
   ncFifoHandle_t* output_buffers_;
-  ncTensorDescriptor_t input_descriptor_;
-  ncTensorDescriptor_t output_descriptor_;
 };
 
 }  // namespace ncsdk
