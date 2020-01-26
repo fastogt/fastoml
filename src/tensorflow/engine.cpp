@@ -209,7 +209,6 @@ common::ErrnoError Engine::PredictImpl(IFrame* in_frame, IPrediction** pred) {
     return common::make_errno_error("Cannot allocate status", ENOMEM);
   }
 
-  Prediction* lpred = new Prediction;
   TF_Status* status = pstatus.get();
 
   TF_Output run_outputs = {out_operation, 0};
@@ -226,6 +225,7 @@ common::ErrnoError Engine::PredictImpl(IFrame* in_frame, IPrediction** pred) {
     return common::make_errno_error(TF_Message(status), EINTR);
   }
 
+  Prediction* lpred = new Prediction;
   lpred->SetTensor(graph, out_operation, out_tensor);
   *pred = lpred;
   return common::ErrnoError();
