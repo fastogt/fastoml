@@ -1,4 +1,4 @@
-/*  Copyright (C) 2014-2019 FastoGT. All right reserved.
+/*  Copyright (C) 2014-2020 FastoGT. All right reserved.
 
     This file is part of FastoML.
 
@@ -157,7 +157,7 @@ common::ErrnoError Backend::MakeBackEnd(SupportedBackends code, Backend** backen
 #else
     return common::make_errno_error_inval();
 #endif
-  } else if (code == NCSDK){
+  } else if (code == NCSDK) {
 #if defined(HAVE_NCSDK)
     model = new fastoml::ncsdk::Model;
     engine = new fastoml::ncsdk::Engine;
