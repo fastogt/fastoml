@@ -99,7 +99,12 @@ common::ErrnoError Prediction::SetTensor(TF_Graph* graph, TF_Operation* operatio
   return common::ErrnoError();
 }
 
-Prediction::~Prediction() {}
+Prediction::~Prediction() {
+  if (tensor_) {
+    TF_DeleteTensor(tensor_);
+    tensor_ = nullptr;
+  }
+}
 
 }  // namespace tensorflow
 }  // namespace fastoml
