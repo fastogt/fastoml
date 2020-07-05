@@ -20,7 +20,7 @@
 
 #include <string>
 
-#include <common/draw/types.h>
+#include <common/draw/size.h>
 #include <common/error.h>
 #include <common/value.h>
 

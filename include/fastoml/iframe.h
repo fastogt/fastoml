@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <common/draw/types.h>
+#include <common/draw/size.h>
 #include <common/error.h>
 
 #include <fastoml/types.h>

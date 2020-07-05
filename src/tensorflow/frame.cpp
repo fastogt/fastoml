@@ -108,12 +108,12 @@ common::ErrnoError Frame::Validate(int64_t* dims, int64_t num_dims) {
 
   common::draw::Size size = GetSize();
   /* Check that widths match */
-  if (dims[1] != size.width) {
+  if (dims[1] != size.width()) {
     return common::make_errno_error("Unsupported image width", EINVAL);
   }
 
   /* Check that heights match */
-  if (dims[2] != size.height) {
+  if (dims[2] != size.height()) {
     return common::make_errno_error("Unsupported image height", EINVAL);
   }
 
